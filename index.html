@@ -3,25 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="自动定位，找出离你最近的5家上海酒鬼巡游记参与酒馆，按直线距离排序。">
-<title>酒鬼地图暖心版</title>
+<meta name="description" content="随时随地出发，找到离你最近的酒鬼巡游记参与酒馆。">
+<title>酒鬼地图 · 随时随地 high 起来</title>
 <style>
 :root{
-  --bg:#faf7f2;
-  --bg-soft:#f3eee6;
-  --ink:#2b2620;
-  --ink-soft:#6f665c;
-  --line:#e6dfd3;
-  --brand:#b5651d;
-  --brand-soft:#f0e2d2;
-  --accent:#c9a227;
+  --bg:#0e0d12;
+  --card:#1c1923;
+  --card-hi:#241f2e;
+  --ink:#f3eee6;
+  --ink-soft:#a49db0;
+  --line:#2e2938;
+  --neon:#ff7a3d;
+  --neon-2:#ffb347;
+  --neon-glow:rgba(255,122,61,.35);
   font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
   color:var(--ink);
   background:var(--bg);
   font-size:15px;
 }
 *{box-sizing:border-box}
-body{margin:0}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,122,61,.16), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 100% 20%, rgba(120,80,255,.10), transparent 70%),
+    var(--bg);
+  background-attachment:fixed;
+}
 main{max-width:720px;margin:auto;padding:0 18px 8px}
 
 header{
@@ -29,58 +37,85 @@ header{
   padding:18px 0;border-bottom:1px solid var(--line);
   font-size:12px;color:var(--ink-soft);
 }
-.brand{font-size:17px;font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:.5px}
-.brand span{font-size:10px;letter-spacing:2px;margin-left:8px;color:var(--brand);font-weight:400}
+.brand{
+  font-size:17px;font-weight:800;color:var(--ink);text-decoration:none;letter-spacing:.5px;
+  text-shadow:0 0 18px var(--neon-glow);
+}
+.brand span{font-size:10px;letter-spacing:2px;margin-left:8px;color:var(--neon);font-weight:500}
 
-.hero{padding:32px 0 22px}
-.eyebrow{font-size:12px;color:var(--brand);letter-spacing:1px;margin-bottom:10px}
+.hero{padding:44px 0 26px;position:relative}
+.eyebrow{
+  font-size:12px;letter-spacing:2px;color:var(--neon);
+  font-weight:600;margin-bottom:14px;
+  text-shadow:0 0 14px var(--neon-glow);
+}
 h1{
-  font-size:clamp(26px,6vw,34px);
-  line-height:1.35;margin:0 0 12px;letter-spacing:-.5px;font-weight:700;
+  font-size:clamp(30px,7.2vw,42px);
+  line-height:1.25;margin:0 0 18px;letter-spacing:-1px;font-weight:900;
 }
-.hero p{color:var(--ink-soft);line-height:1.75;margin:0;font-size:14px}
-.badges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
-.badges span{
-  border:1px solid var(--line);border-radius:6px;
-  padding:5px 10px;font-size:11px;color:var(--ink-soft);background:#fff;
+h1 em{
+  font-style:normal;
+  background:linear-gradient(100deg,var(--neon),var(--neon-2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 30px var(--neon-glow);
 }
+.hero p{color:var(--ink-soft);line-height:1.85;margin:0 0 12px;font-size:14px}
+.hero p strong{color:var(--ink);font-weight:600}
+.hero p .name{color:var(--neon-2);font-weight:700}
+.story{
+  margin-top:18px;padding:14px 16px;
+  border-left:2px solid var(--neon);
+  background:linear-gradient(90deg,rgba(255,122,61,.08),transparent);
+  border-radius:0 8px 8px 0;
+  font-size:13px;line-height:1.8;color:var(--ink-soft);
+}
+.story b{color:var(--neon-2)}
 
 .panel{
-  background:#fff;padding:18px;border:1px solid var(--line);
-  border-radius:12px;margin-bottom:24px;
+  background:var(--card);padding:18px;
+  border:1px solid var(--line);border-radius:14px;margin-bottom:24px;
+  box-shadow:0 20px 40px -24px #000;
 }
 .panel h2{font-size:15px;margin:0 0 8px;font-weight:700}
 #status{font-size:13px;color:var(--ink-soft);margin:0 0 12px;line-height:1.6}
 
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 input:not([type=checkbox]){
-  background:var(--bg-soft);color:var(--ink);
-  border:1px solid var(--line);border-radius:8px;
-  padding:12px 14px;font:inherit;min-width:160px;flex:1;
+  background:#100e15;color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;
+  padding:13px 14px;font:inherit;min-width:160px;flex:1;
+  transition:border-color .2s,box-shadow .2s;
 }
-input:not([type=checkbox])::placeholder{color:#a89f92}
-button,select,.maplink{font:inherit;border:0;border-radius:8px;padding:11px 16px;cursor:pointer}
-button{background:var(--brand);color:#fff;font-weight:600;font-size:14px}
-button:hover{background:#a05618}
-button:disabled{opacity:.45;cursor:wait}
+input:not([type=checkbox]):focus{
+  border-color:var(--neon);outline:none;
+  box-shadow:0 0 0 3px var(--neon-glow);
+}
+input:not([type=checkbox])::placeholder{color:#6d6579}
+button,select,.maplink{font:inherit;border:0;border-radius:10px;padding:12px 18px;cursor:pointer;transition:all .2s}
+button{
+  background:linear-gradient(135deg,var(--neon),var(--neon-2));
+  color:#1a0f06;font-weight:800;font-size:14px;
+  box-shadow:0 6px 20px -6px var(--neon-glow);
+}
+button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+button:disabled{opacity:.45;cursor:wait;transform:none;filter:none}
 .secondary,select{
-  background:#fff;color:var(--ink);border:1px solid var(--line);
+  background:#1a1722;color:var(--ink);border:1px solid var(--line);
 }
-.secondary:hover,select:hover{background:var(--bg-soft)}
+.secondary:hover,select:hover{background:var(--card-hi)}
 
 details{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
-summary{cursor:pointer;color:var(--brand);font-size:14px;font-weight:600;list-style:none}
+summary{cursor:pointer;color:var(--neon);font-size:14px;font-weight:600;list-style:none}
 summary::-webkit-details-marker{display:none}
-summary::before{content:"›";display:inline-block;margin-right:6px;transition:transform .2s;color:var(--brand)}
+summary::before{content:"›";display:inline-block;margin-right:6px;transition:transform .2s}
 details[open] summary::before{transform:rotate(90deg)}
 details p{font-size:13px;color:var(--ink-soft);line-height:1.7;margin:10px 0}
 
-a{color:var(--brand)}
+a{color:var(--neon)}
 
 .listhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
-.listhead h2{font-size:16px;margin:0;font-weight:700}
+.listhead h2{font-size:16px;margin:0;font-weight:800}
 small{font-weight:400;color:var(--ink-soft);font-size:11px}
-
 #coverage{font-size:12px;color:var(--ink-soft);margin:0 0 14px}
 
 .filters{margin:16px 0}
@@ -89,60 +124,62 @@ label{white-space:nowrap;color:var(--ink-soft);font-size:13px}
 #list{display:grid;grid-template-columns:1fr;gap:10px}
 
 .card{
-  border:1px solid var(--line);background:#fff;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);border-radius:14px;
   padding:16px 16px 14px;display:flex;flex-direction:column;gap:8px;
-  position:relative;
+  position:relative;transition:border-color .2s,transform .2s;
 }
+.card:hover{border-color:rgba(255,122,61,.45);transform:translateY(-1px)}
 .card::before{
   content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;
-  border-radius:0 3px 3px 0;background:var(--brand-soft);
+  border-radius:0 3px 3px 0;
+  background:linear-gradient(180deg,var(--neon),var(--neon-2));
+  box-shadow:0 0 12px var(--neon-glow);
 }
-.cardtop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.card h3{font-size:16px;line-height:1.5;margin:0;font-weight:700;padding-left:10px}
+.card h3{font-size:16px;line-height:1.5;margin:0;font-weight:800;padding-left:12px}
 
 .tag{display:none}
 
 .distance{
-  font-size:15px;font-weight:700;color:var(--brand);
+  font-size:15px;font-weight:800;color:var(--neon-2);
   white-space:nowrap;flex-shrink:0;
+  text-shadow:0 0 12px var(--neon-glow);
 }
-.card p{font-size:13px;margin:0;color:var(--ink-soft);line-height:1.6;padding-left:10px}
+.card p{font-size:13px;margin:0;color:var(--ink-soft);line-height:1.6;padding-left:12px}
 .card p:first-of-type{color:var(--ink)}
-
-.card small{margin:0;font-size:11px;color:#a89f92;padding-left:10px}
-
-.actions{display:flex;gap:8px;margin-top:4px;padding-left:10px}
+.card small{margin:0;font-size:11px;color:#6d6579;padding-left:12px}
+.actions{display:flex;gap:8px;margin-top:4px;padding-left:12px}
 .maplink{
   font-size:13px;text-decoration:none;display:inline-block;
-  border:1px solid var(--brand);color:var(--brand);background:#fff;
-  padding:7px 14px;border-radius:8px;font-weight:600;
+  border:1px solid var(--neon);color:var(--neon);background:transparent;
+  padding:8px 16px;border-radius:10px;font-weight:700;
 }
-.maplink:hover{background:var(--brand-soft)}
+.maplink:hover{background:rgba(255,122,61,.12);box-shadow:0 0 18px -4px var(--neon-glow)}
 
 #placeholder{
   padding:28px 20px;color:var(--ink-soft);font-size:13px;line-height:1.7;
-  border:1px dashed var(--line);border-radius:12px;text-align:center;background:#fff;
+  border:1px dashed var(--line);border-radius:14px;text-align:center;background:var(--card);
 }
 
 .place-option{
   width:100%;display:flex;flex-direction:column;align-items:flex-start;
   text-align:left;gap:4px;margin-top:8px;
-  background:var(--bg-soft);color:var(--ink);
-  border:1px solid var(--line);padding:12px 14px;border-radius:8px;
+  background:#1a1722;color:var(--ink);
+  border:1px solid var(--line);padding:12px 14px;border-radius:10px;
+  box-shadow:none;font-weight:400;
 }
 .place-option span{font-size:12px;color:var(--ink-soft)}
-.place-option:hover{background:var(--brand-soft);border-color:var(--brand)}
-.place-option strong{font-size:14px}
+.place-option:hover{background:var(--card-hi);border-color:var(--neon);transform:none;filter:none}
+.place-option strong{font-size:14px;font-weight:700}
 
 #placeResults{margin-top:8px}
 
 footer{
-  font-size:11px;color:#a89f92;line-height:1.9;
+  font-size:11px;color:#6d6579;line-height:1.9;
   padding:28px 0 40px;border-top:1px solid var(--line);margin-top:20px;
 }
 
 button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
-  outline:2px solid var(--accent);outline-offset:2px;
+  outline:2px solid var(--neon-2);outline-offset:2px;
 }
 
 @media(max-width:640px){
@@ -150,10 +187,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
   header{font-size:11px}
   .brand{font-size:16px}
   .brand span{display:none}
-  .hero{padding:26px 0 18px}
+  .hero{padding:30px 0 20px}
   .panel{padding:16px}
   .row>button{flex-grow:1}
-  .badges span{font-size:10px}
   .filters input{width:100%}
 }
 </style>
@@ -165,18 +201,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
 </header>
 
 <section class="hero">
-  <div class="eyebrow">下一杯，就在附近</div>
-  <h1>最近的 5 家，帮你找好了</h1>
-  <p>允许定位后，自动按距离排序。只看本期参与酒馆。</p>
+  <div class="eyebrow">EVERY NIGHT IS A ROUTE</div>
+  <h1>不用路线，<br><em>出门就是酒局。</em></h1>
+  <p>灵感来源于没按地图路线走，凌晨在马路上暴走了 <strong>2 个小时</strong>，最后只喝到几家的两个酒鬼 <span class="name">mxm&amp;gyt</span>。</p>
+  <p>于是我们决定做个东西：<strong>打开就能看到离你最近的参与酒馆</strong>。不用规划路线，不用凑时间，站在哪条街，就在哪条街 high 起来。</p>
+  <div class="story">那晚之后我们想明白一件事——酒鬼地图不该是任务清单，而是<strong>随时可以出发的底气</strong>。</div>
 </section>
 
 <section class="panel">
-  <h2>你的位置</h2>
-  <p id="status" role="status" aria-live="polite">正在准备定位…</p>
+  <h2>你现在在哪？</h2>
+  <p id="status" role="status" aria-live="polite">正在等你打开定位…</p>
   <button id="locate">重新定位</button>
   <details id="manual" open>
-    <summary>输入地点，查找附近酒馆</summary>
-    <p>使用高德搜索地铁站、商场、学校、酒店等地点，选择正确结果后显示最近5家。</p>
+    <summary>输入地点，找附近的酒馆</summary>
+    <p>搜地铁站、商场、学校、酒店都行，选对结果就显示最近的几家。</p>
     <div class="row">
       <input id="origin" aria-label="出发点" placeholder="例如：人民广场、静安寺、上海科技大学">
       <button id="go">搜索地点</button>
@@ -186,17 +224,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
 
 <section>
   <div class="listhead">
-    <h2 id="resultTitle">附近参与酒馆</h2>
+    <h2 id="resultTitle">离你最近的几家</h2>
   </div>
   <p id="coverage"></p>
-  <div id="placeholder">正在等待位置授权，取得位置后自动显示最近5家。</div>
+  <div id="placeholder">定位一开，最近的酒馆就冒出来了。</div>
   <div id="list" aria-live="polite"></div>
 </section>
 
 <footer>
   非官方辅助工具 · 名单来自酒鬼巡游记「上海26五期」，共91条门店记录，采集于2026.11.09，页面显示使用截止日2026.12.21。<br>
-  显示的是直线距离，并非步行或行车路程；店铺地址、活动资格与营业时间请到店前核实。定位权限由浏览器和手机系统控制。<br>
-  地点搜索由高德地图提供。点击搜索时，地点关键词会发送至高德；自动定位坐标与距离计算保留在本机。
+  显示的是直线距离，不是步行或行车路程；店铺地址、活动资格和营业时间，到店前记得再核实一下。定位权限由浏览器和手机系统控制。<br>
+  地点搜索由高德地图提供。你搜的关键词会发给高德；自动定位的坐标和距离计算只留在你本机。
 </footer>
 </main>
 
@@ -224,7 +262,7 @@ function show(){
     const addr=document.createElement('p');addr.textContent=b.address;
     const time=document.createElement('p');time.textContent=b.hours;
     const link=document.createElement('a');
-    link.className='maplink';link.textContent='查看地图与路线';
+    link.className='maplink';link.textContent='带我去 →';
     link.href='https://uri.amap.com/marker?position='+b.point.join(',')+'&name='+encodeURIComponent(b.name)+'&coordinate=gaode&callnative=1';
     link.rel='noopener';
     const info=document.createElement('small');info.textContent='坐标按'+(b.matchLevel||'门店位置')+'匹配，实际路程以地图为准';
@@ -233,7 +271,7 @@ function show(){
     $('list').append(card)
   });
   $('placeholder').hidden=true;
-  message('已按直线距离从近到远排序。'+(lastAccuracy?'定位精度约 '+Math.round(lastAccuracy)+' 米。':''));
+  message('找到你了，按直线距离从近到远排好了。'+(lastAccuracy?' 定位精度约 '+Math.round(lastAccuracy)+' 米。':''));
 }
 
 function gcj(lng,lat){
@@ -274,7 +312,7 @@ function locate(){
 function failure(s){
   message(s+'。可点击“重新定位”，或输入地点名称查询。微信内无法定位时，可通过右上角菜单在系统浏览器打开。');
   $('manual').open=true;
-  $('placeholder').textContent='取得位置后，这里会显示最近的5家参与酒馆。';
+  $('placeholder').textContent='定位没开？没关系，上面手动搜个地方也行。';
 }
 
 $('locate').onclick=locate;
