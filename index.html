@@ -1,28 +1,393 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="自动定位，找出离你最近的5家上海酒鬼巡游记参与酒馆，按直线距离排序。"><title>酒鬼地图暖心版</title><style>:root{font-family:"Microsoft YaHei",system-ui,sans-serif;color:#f5f0e8;background:#171f1d;font-size:15px}*{box-sizing:border-box}body{margin:0}main{max-width:1040px;margin:auto;padding:0 32px}header{display:flex;justify-content:space-between;align-items:center;padding:28px 0;border-bottom:1px solid #3d4842;color:#b9c4ba;font-size:13px}.brand{font-size:22px;font-weight:800;color:#f5f0e8;text-decoration:none}.brand span{font-size:10px;letter-spacing:3px;margin-left:10px;color:#cbdc82}.hero{padding:68px 0 42px;background:radial-gradient(ellipse at 90% 60%,#38463580,transparent 60%)}.eyebrow{letter-spacing:3px;color:#cbdc82;font-size:12px}h1{font-size:clamp(52px,8vw,88px);letter-spacing:-3px;line-height:1.12;margin:22px 0}p{color:#b9c4ba;line-height:1.8}h2{font-size:20px;margin:0 0 18px}.badges{display:flex;gap:12px;margin-top:28px}.badges span{border:1px solid #4e5b4e;border-radius:24px;padding:8px 14px;font-size:12px;color:#d5debd}.panel{background:#26312b;padding:28px;border:1px solid #43513f;border-radius:16px;margin-bottom:44px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}input:not([type=checkbox]){background:#19231e;color:#fff;border:1px solid #536151;border-radius:8px;padding:14px;font:inherit;min-width:160px;flex:1}button,select,.maplink{font:inherit;border:0;border-radius:8px;padding:13px 16px;background:#d1e18e;color:#1a2616;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.secondary,select{background:#303d34;color:#e3ead9;border:1px solid #536151}#status{font-size:13px;margin-bottom:0}details{margin-top:18px;border-top:1px solid #44513f;padding-top:16px}summary{cursor:pointer;color:#d1e18e}details p{font-size:13px}a{color:#d1e18e}.listhead{display:flex;align-items:center;justify-content:space-between}.listhead h2{margin:0}small{font-weight:400;color:#bfcaa8;margin-left:8px}.filters{margin:22px 0}label{white-space:nowrap;color:#b9c4ba;font-size:13px}#list{display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{border:1px solid #415044;background:#202b25;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:12px}.cardtop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.card h3{font-size:17px;line-height:1.6;margin:0}.star{padding:0;background:none;color:#d1e18e;font-size:24px}.card p{font-size:13px;margin:0}.distance{font-size:12px;color:#d1e18e}.actions{display:flex;gap:10px;margin-top:auto;padding-top:8px}.maplink{font-size:13px;text-decoration:none;display:inline-block}.copy{font-size:13px}.tag{font-size:10px;letter-spacing:1px;color:#b5c594}footer{font-size:12px;color:#98a497;line-height:1.9;padding:42px 0}button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #f1c57a;outline-offset:3px}@media(max-width:640px){main{padding:0 18px}header{font-size:11px}.brand{font-size:20px}.brand span{display:none}.hero{padding-top:45px}.panel{padding:20px}#list{grid-template-columns:1fr}.row>button{flex-grow:1}.badges{gap:6px}.badges span{font-size:10px}.filters input{width:100%}}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="自动定位，找出离你最近的5家上海酒鬼巡游记参与酒馆，按直线距离排序。">
+<title>酒鬼地图暖心版</title>
+<style>
+:root{
+  --bg:#faf7f2;
+  --bg-soft:#f3eee6;
+  --ink:#2b2620;
+  --ink-soft:#6f665c;
+  --line:#e6dfd3;
+  --brand:#b5651d;
+  --brand-soft:#f0e2d2;
+  --accent:#c9a227;
+  font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+  font-size:15px;
+}
+*{box-sizing:border-box}
+body{margin:0}
+main{max-width:720px;margin:auto;padding:0 18px 8px}
 
-#list{grid-template-columns:1fr}.distance{font-size:24px}.card{gap:13px}.hero{padding:44px 0 30px}h1{font-size:52px}.brand{font-size:20px}.card small{margin:0;font-size:11px}.maplink{align-self:flex-start}#placeholder{padding:30px;color:#aebbaa;border:1px dashed #536151;border-radius:12px} .panel{margin-bottom:28px}.place-option{width:100%;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:7px;margin-top:10px;background:#354438;color:#f5f0e8;border:1px solid #68795b}.place-option span{font-size:12px;color:#c8d1be}.place-option:hover{background:#41563c}#placeResults{margin-top:12px}</style></head><body><main><header><a class="brand" href="./">酒鬼地图暖心版</a><span>上海 · 26五期</span></header><section class="hero"><div class="eyebrow">下一杯，就在附近</div><h1>最近的 5 家，<br>帮你找好了。</h1><p>允许定位后，自动按距离排序。只看本期参与酒馆。</p></section><section class="panel"><h2>你的位置</h2><p id="status" role="status" aria-live="polite">正在准备定位…</p><button id="locate">◎ 重新定位</button><details id="manual" open><summary>输入地点，查找附近酒馆</summary><p style="color:#d1e18e;font-size:12px">搜索引擎：高德地图 · GH5 已实测</p><p>使用高德搜索地铁站、商场、学校、酒店等地点，选择正确结果后显示最近5家。</p><div class="row"><input id="origin" aria-label="出发点" placeholder="例如：人民广场、静安寺、上海科技大学"><button id="go">搜索地点</button></div></details></section><section><h2 id="resultTitle">附近参与酒馆</h2><p id="coverage"></p><div id="placeholder">正在等待位置授权，取得位置后自动显示最近5家。</div><div id="list" aria-live="polite"></div></section><footer>非官方辅助工具 · 名单来自酒鬼巡游记「上海26五期」，共91条门店记录，采集于2026.11.09，页面显示使用截止日2026.12.21。<br>显示的是直线距离，并非步行或行车路程；店铺地址、活动资格与营业时间请到店前核实。定位权限由浏览器和手机系统控制。<br>地点搜索由高德地图提供。点击搜索时，地点关键词会发送至高德；自动定位坐标与距离计算保留在本机。</footer></main><script>window.BARS=[{"name": "榴芒·叙事·桌游&社交聚会homebar", "address": "大学路21710楼1001室", "hours": "参考营业时间：周一到周日 16:00～02:00", "point": [121.509186, 31.303694], "matchedAddress": "大学路217号602室(江湾体育场地铁站9号口步行350米)", "matchLevel": "楼栋附近（约定位）"}, {"name": "Pinch cafe&bar", "address": "建国西路283号尚街Loft5号楼105室", "hours": "参考营业时间：周一至周日18.00-02.00", "point": [121.45838, 31.204968], "matchedAddress": "上海市徐汇区建国西路283号", "matchLevel": "门牌号"}, {"name": "Project W 威士忌·鸡尾酒", "address": "襄阳北路17号-1（襄乐大厦1楼-1、襄阳北路与巨鹿路交叉口南行200米路东）", "hours": "参考营业时间：周一至周日 19:30一01:00 周五周六21.30之后特殊情况需要外带", "point": [121.454696, 31.220081], "matchedAddress": "襄阳北路17号", "matchLevel": "兴趣点", "matchedName": "PROJECT W(襄乐大厦店)"}, {"name": "FLOYD BAR·桌游社交", "address": "上海市杨浦区五角场街道创智66商务楼锦创路20号8楼", "hours": "参考营业时间：周一到周日19：00-02：00", "geocodeIssue": "OK", "point": [121.509225, 31.304225], "matchLevel": "同楼地址", "matchedAddress": "锦创路20号"}, {"name": "ASC Wine Atelier醇艺坊(上海店)", "address": "江西中路215号", "hours": "参考营业时间：周一到周日 13：00-21：00", "point": [121.48835, 31.236373], "matchedAddress": "上海市黄浦区江西中路215号", "matchLevel": "门牌号"}, {"name": "上海力波·精酿鲜啤馆(耀华滨江公寓店)", "address": "上钢新村街道济明路431号耀华逸坊1层B室", "hours": "参考营业时间 周一至周日17:00-01:00", "point": [121.475399, 31.170974], "matchedAddress": "上海市浦东新区上钢新村街道济明路431号", "matchLevel": "门牌号"}, {"name": "Double S", "address": "绍兴路100号", "hours": "参考营业时间：周一至周日 20:00-01:30", "point": [121.462448, 31.208774], "matchedAddress": "绍兴路100号", "matchLevel": "兴趣点"}, {"name": "THE HOLE IN THE WALL", "address": "昌平路653号(昌平路地铁站4号口步行270米)", "hours": "参考营业时间：周一至周日 19:30-02:00", "point": [121.444118, 31.232977], "matchedAddress": "上海市静安区昌平路653号", "matchLevel": "门牌号"}, {"name": "这没HomeBar&Dance(人广首店)", "address": "六合路98号港陆黄浦中心5A", "hours": "参考营业时间：周一至周四,周日 20:00-01:30 周五,周六 20:00-02:00", "point": [121.475007, 31.236587], "matchedAddress": "上海市黄浦区六合路98号港陆黄浦中心", "matchLevel": "兴趣点"}, {"name": "Glimmer Six", "address": "大沽路386-1", "hours": "参考营业时间：周五六16:00-23:00 周日到周一16:00-02:00", "point": [121.464686, 31.225562], "matchedAddress": "上海市静安区大沽路436号", "matchLevel": "门牌号"}, {"name": "DaGa嗒嘎·homebar(长宁龙之梦店)", "address": "华阳路街道长宁路1018号17楼1706室", "hours": "参考营业时间：周二至周日 20:00-02:00（周一店休）", "point": [121.416664, 31.219084], "matchedAddress": "华阳路街道长宁路1018号17楼1706室", "matchLevel": "兴趣点", "matchedName": "DaGa嗒嘎·homebar(长宁龙之梦店)"}, {"name": "M7 Play Bar VISTA酒吧", "address": "常德路1240号", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.436309, 31.240901], "matchedAddress": "上海市普陀区常德路1240号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(陕康里店)", "address": "陕西北路812-2号", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.448568, 31.234877], "matchedAddress": "上海市静安区陕西北路812号", "matchLevel": "门牌号"}, {"name": "PRE DRINK不误正夜(成都南路店)", "address": "成都南路122号", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.467625, 31.221725], "matchedAddress": "成都南路122号", "matchLevel": "兴趣点", "matchedName": "PRE-DRINK 不误正夜(成都南路店)"}, {"name": "LastDrop 福根儿", "address": "陕西北路549号-7室", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.451636, 31.231558], "matchedAddress": "上海市静安区陕西北路549", "matchLevel": "门牌号"}, {"name": "PRE DRINK不误正夜(陕西南路店)", "address": "陕西南路90号", "hours": "参考营业时间：周一至周日18:00-02:00", "point": [121.457898, 31.219147], "matchedAddress": "上海市徐汇区陕西南路188弄", "matchLevel": "门牌号"}, {"name": "SIDE BAR 飞镖主题运动吧", "address": "茂名南路56号食尚谷SIDE BAR飞镖运动酒吧", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.460161, 31.221365], "matchedAddress": "上海市黄浦区茂名南路56号食尚谷SIDE BAR", "matchLevel": "兴趣点"}, {"name": "8PINTS八品脱·小花园餐酒吧(漕宝路店)", "address": "漕宝路36号2号楼C单元103室", "hours": "参考营业时间：周一至周日11:00-02:00", "point": [121.349754, 31.156112], "matchedAddress": "上海市闵行区漕宝路36号", "matchLevel": "门牌号"}, {"name": "云山之藤(久光店)", "address": "南京西路1618号久光百货5楼", "hours": "参考营业时间：周一至周日14:00-21:30", "point": [121.445889, 31.223647], "matchedAddress": "南京西路1618号久光百货5楼(静安寺地铁站出入口旁)", "matchLevel": "兴趣点", "matchedName": "云山之藤(久光店)"}, {"name": "幸福里homebar•年轻社交空间", "address": "定西路1016号银统大厦北楼1012号", "hours": "参考营业时间：周二至周日 20:00-01:30 周五、周六 20:00-02:00 (周一店休)", "point": [121.423835, 31.210906], "matchedAddress": "上海市长宁区定西路1016号银统大厦北楼", "matchLevel": "兴趣点"}, {"name": "隐·九 BAR&COFFEE&TEA", "address": "淡水路250号(一大会址·新天地地铁站5号口步行220米)", "hours": "参考营业时间：周一至周日 19:00-02:00", "point": [121.473042, 31.216707], "matchedAddress": "上海市黄浦区淡水路250号", "matchLevel": "门牌号"}, {"name": "W BAR·Shisha民谣鸡尾酒吧(长寿路店)", "address": "莫干山路50号3-107WArt&Bistro艺术酒馆", "hours": "参考营业时间：周一至周日 19:00-01:00", "point": [121.448919, 31.247568], "matchedAddress": "莫干山路50号创意园内3-107 We Bar", "matchLevel": "兴趣点", "matchedName": "W BAR艺术民谣鸡尾酒吧(M50店)"}, {"name": "把酒不离喰 烧鸟&GODY BREW精酿酒吧(西藏北路店)", "address": "西藏北路205-1号(曲阜路地铁站1号口步行130米)", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.471338, 31.241937], "matchedAddress": "上海市静安区西藏北路75号", "matchLevel": "门牌号"}, {"name": "阿光的奶酒铺(锦灏佳园店)", "address": "锦灏佳园西北2门旁(延长路地铁站2号口步行340米)", "hours": "参考营业时间：周一至周日 17:30-02:00", "point": [121.459221, 31.272579], "matchedAddress": "锦灏佳园西北2门旁(延长路地铁站2号口步行340米)", "matchLevel": "兴趣点", "matchedName": "阿光的奶酒铺(锦灏佳园店)"}, {"name": "聚野Taproom", "address": "威海路870号", "hours": "参考营业时间：周一至周日 19:00-01:00", "point": [121.455276, 31.224601], "matchedAddress": "威海路870号(威海路888弄小区正门旁)", "matchLevel": "兴趣点"}, {"name": "魔女喝喝精酿酒屋(静安店)", "address": "武定路535号", "hours": "参考营业时间：周一至周日10:00-02:00", "point": [121.450131, 31.232877], "matchedAddress": "上海市静安区武定路535号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(襄阳北路店)", "address": "襄阳北路1号", "hours": "参考营业时间：周一至周日17:00-02:00", "point": [121.454283, 31.221], "matchedAddress": "襄阳北路1号", "matchLevel": "兴趣点", "matchedName": "DASH LAND(襄阳北路店)"}, {"name": "724 Music Bar(灵石路店)", "address": "灵石路699号2号楼104室", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.445761, 31.283446], "matchedAddress": "上海市静安区灵石路699号", "matchLevel": "门牌号"}, {"name": "温暖的家Warm House(大学路店)", "address": "上海市杨浦区锦创路20号502室", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.509225, 31.304225], "matchedAddress": "锦创路与大学路交叉口北40米", "matchLevel": "兴趣点", "matchedName": "温暖的家Warm House水烟吧(大学路店)"}, {"name": "魔女喝喝酒集(徐汇店)", "address": "石龙路659号", "hours": "参考营业时间：周一至周日 11:00-02:00", "point": [121.434291, 31.152058], "matchedAddress": "上海市徐汇区石龙路659号", "matchLevel": "门牌号"}, {"name": "桥Pub·1店(武宁路桥店)", "address": "光复西路与谈家渡路交叉口东20米", "hours": "参考营业时间：周一至周日 10:00-01:00", "point": [121.425731, 31.236478], "matchedAddress": "光复西路与谈家渡路交叉口东20米", "matchLevel": "兴趣点", "matchedName": "桥Pub·桥洞空间·早C晚A"}, {"name": "夜航Homebar·拼豆手作·微醺酒馆", "address": "延安西路777号裕丰国际大厦701室", "hours": "参考营业时间：周五,周六 19:30-02:00 周二至周四,周日 19:30-24:00", "point": [121.434578, 31.214108], "matchedAddress": "上海市长宁区延安西路777号裕丰国际大厦", "matchLevel": "兴趣点"}, {"name": "斋飞·homebar·年轻社交空间", "address": "延安西路777号裕丰国际大厦1604", "hours": "参考营业时间：周一至周日 21:00-02:00", "point": [121.434578, 31.214108], "matchedAddress": "上海市长宁区延安西路777号裕丰国际大厦", "matchLevel": "兴趣点"}, {"name": "Cs酒吧", "address": "定西路685号新华商务大楼B1层", "hours": "参考营业时间：周一至周日 19:30-02:00", "point": [121.423507, 31.206789], "matchedAddress": "上海市长宁区定西路685号新华商务大楼", "matchLevel": "兴趣点"}, {"name": "半醒bar家庭式酒馆home bar", "address": "长寿路1118号悦达国际大厦A座15B", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.427097, 31.230685], "matchedAddress": "长寿路1118号悦达国际大厦A座L1层", "matchLevel": "兴趣点", "matchedName": "半醒bar家庭式酒馆"}, {"name": "cheerful轮滑桌游唱歌酒吧·轰趴团建", "address": "迪美购物中心北门负一层262、270商铺", "hours": "参考营业时间：周一至周日 11:00-24:00", "point": [121.473411, 31.228569], "matchedAddress": "上海市黄浦区上海迪美购物中心(北门)", "matchLevel": "兴趣点"}, {"name": "Cantona&bar(万航渡路店)", "address": "万航渡路457号", "hours": "参考营业时间：周一至周日 16:30-02:00", "point": [121.436046, 31.225134], "matchedAddress": "上海市静安区万航渡路457号", "matchLevel": "门牌号"}, {"name": "TRK·达鲁酷运动餐酒吧", "address": "公平路209号友邦金融中心地下二层LG2层201号", "hours": "参考营业时间：周一至周日 11:30-22:00", "point": [121.504533, 31.254831], "matchedAddress": "上海市虹口区公平路209号", "matchLevel": "门牌号"}, {"name": "筝歌啤酒屋(巨鹿路店)", "address": "巨鹿路360-8号", "hours": "参考营业时间：周五,周六 18:00-02:00 周一 20:00-01:00 周二至周四,周日 18:00-01:00", "point": [121.458325, 31.222584], "matchedAddress": "上海市黄浦区巨鹿路360号", "matchLevel": "门牌号"}, {"name": "筝歌啤酒屋(静安店)", "address": "康定路856号", "hours": "参考营业时间：周二至周日 18:00-23:00（周一店休）", "point": [121.441918, 31.231477], "matchedAddress": "上海市静安区康定路856号", "matchLevel": "门牌号"}, {"name": "8PINTS八品脱·精酿碳烤餐吧·后门Home bar·17点出餐(胶州路店)", "address": "胶州路633号一层（地铁7号线5号口出来直走过马路就是）", "hours": "参考营业时间：周一至周日 15:00-24:00", "point": [121.43906, 31.233484], "matchedAddress": "上海市静安区胶州路633号", "matchLevel": "门牌号"}, {"name": "Ginnan龙猫Cocktail水烟Bar", "address": "康定路211号1楼D室（江宁路466-3 江宁路康定路路口转角）", "hours": "参考营业时间：周一至周日 18:30-02:00", "point": [121.452311, 31.235772], "matchedAddress": "上海市静安区康定路211号", "matchLevel": "门牌号"}, {"name": "VESPER Whiskey&Cocktail Bar(睿园店)", "address": "桂平路353号F座103B", "hours": "参考营业时间：周一至周日 19:00-01:30", "point": [121.405004, 31.161758], "matchedAddress": "桂平路353号越界睿园F座104", "matchLevel": "楼栋附近（约定位）"}, {"name": "鹿鳴·塔罗主题鸡尾酒吧", "address": "大宁路735号", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.449252, 31.272836], "matchedAddress": "上海市静安区大宁路610弄", "matchLevel": "门牌号"}, {"name": "古仓单一麦芽威士忌俱乐部", "address": "南京东路139号美伦大楼4层M405室", "hours": "参考营业时间：周一至周日 15:00-22:00", "point": [121.486928, 31.237881], "matchedAddress": "上海市黄浦区南京路步行街139号美伦大楼", "matchLevel": "兴趣点"}, {"name": "有楽yolo的小屋派对轰趴·生日团建·Homebar(外滩店）", "address": "南苏州路933号怡水豪庭26楼2603室", "hours": "参考营业时间：周五,周六 20:30-02:00 周二至周四,周日 20:30-01:30", "point": [121.474353, 31.240817], "matchedAddress": "上海市黄浦区南苏州路933号怡水豪庭(西北门)", "matchLevel": "兴趣点"}, {"name": "Cloud·SU LOUNGE the bund", "address": "中山东二路600号复星艺术中心4楼", "hours": "参考营业时间：周一至周日 19:00-01:30", "point": [121.497861, 31.226799], "matchedAddress": "上海市黄浦区中山东二路600号复星艺术中心(西门)", "matchLevel": "兴趣点"}, {"name": "野果与山椒·贵州料理Chill chili(富民路店)", "address": "富民路177号", "hours": "参考营业时间：周一至周日 11:30-02:00", "point": [121.451546, 31.218527], "matchedAddress": "上海市静安区富民路177号", "matchLevel": "门牌号"}, {"name": "满是福德Homebar城市社交空间(淮海店)", "address": "淮海中华大厦2306室", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.483349, 31.225531], "matchedAddress": "上海市黄浦区淮海中华大厦", "matchLevel": "兴趣点"}, {"name": "小公馆 Lafayette1315Bar", "address": "复兴中路1315号", "hours": "参考营业时间：周一至周日 11:00-23:00", "point": [121.454867, 31.211905], "matchedAddress": "复兴中路1315号-1", "matchLevel": "兴趣点"}, {"name": "Pigs Home家庭式酒吧(定西路店)", "address": "定西路1016号2101A", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.422903, 31.210873], "matchedAddress": "上海市长宁区定西路1016号", "matchLevel": "门牌号"}, {"name": "Alive活着", "address": "同心路723号德必7街区A座一楼M9（巷子走到底）", "hours": "参考营业时间：周五至周日 20:00-02:00 周一至周四 20:00-24:00", "point": [121.473501, 31.270051], "matchedAddress": "同心路723号德必7街区A座一楼M9(巷子走到底)", "matchLevel": "兴趣点", "matchedName": "Alive Bar"}, {"name": "Black vine pub 黑蔓酒吧", "address": "政民路230-4号沿街", "hours": "参考营业时间：周一至周日 17:30-02:00", "point": [121.506433, 31.302424], "matchedAddress": "上海市杨浦区政民路230号", "matchLevel": "门牌号"}, {"name": "LB微醺人才培训中心·bar", "address": "丹巴路苏宁天御国际广场B1座1206室", "hours": "参考营业时间：周二至周日 21:00-02:00", "geocodeIssue": "OK", "point": [121.380375, 31.223425], "matchedAddress": "丹巴路99号(近光复西路)苏宁·天御国际广场", "matchLevel": "楼栋附近（约定位）"}, {"name": "离线Homebar·家庭酒馆", "address": "大学路307号502室", "hours": "参考营业时间：周二至周日 20:00-02:00", "point": [121.507627, 31.303165], "matchedAddress": "上海市杨浦区大学路307号", "matchLevel": "门牌号"}, {"name": "有乐YOLO HOMEBAR", "address": "南苏州路933号怡水豪庭26楼2603室", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.474353, 31.240817], "matchedAddress": "上海市黄浦区南苏州路933号怡水豪庭(西北门)", "matchLevel": "兴趣点"}, {"name": "Brew&Tipsy Cafe", "address": "福泉路52号（宜家对面）", "hours": "参考营业时间：周日至周一18.00到01:00 周五周六18:00至02:00", "geocodeIssue": "OK", "point": [121.35783, 31.222205], "matchedAddress": "金钟路658-17号楼", "matchLevel": "地图门店（地址待核实）"}, {"name": "ANOTHER9(永昌大厦店)", "address": "余姚路27号", "hours": "参考营业时间：周一至周日 19:00-02:00", "point": [121.443786, 31.23612], "matchedAddress": "余姚路27号", "matchLevel": "兴趣点", "matchedName": "Another9(永昌大厦店)"}, {"name": "小亲新清酒社", "address": "永康路120号2楼空间", "hours": "参考营业时间：周一至周日 16:00-00:30", "point": [121.457025, 31.210675], "matchedAddress": "永康路120号2层", "matchLevel": "兴趣点"}, {"name": "Golang•md Bar(西岸梦中心店)", "address": "龙华街道GateM西岸梦中心10栋（滑板公园旁）", "hours": "参考营业时间：周一至周日 10:00-24:00", "geocodeIssue": "OK", "point": [121.46615, 31.159469], "matchedAddress": "龙腾大道2266号Gate M西岸梦中心10幢一层115-116单元", "matchLevel": "楼栋附近（约定位）"}, {"name": "卓X·研酒工坊", "address": "中山北路2790号杰地大厦五楼503-504室", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.418491, 31.2408], "matchedAddress": "上海市普陀区中山北路2790号杰地大厦(西北门)", "matchLevel": "兴趣点"}, {"name": "MENTAN 漫啖", "address": "南昌路264号", "hours": "参考营业时间：周三至周一 19:30-01:30 （周二店休）", "point": [121.463747, 31.217548], "matchedAddress": "上海市黄浦区南昌路264号", "matchLevel": "门牌号"}, {"name": "赛乐酒窖Cellar Door Wines(嘉善路店)", "address": "嘉善路508号尚街园区103A", "hours": "参考营业时间：周日 13:00-22:00 周一至周六 11:00-22:00", "point": [121.460004, 31.204469], "matchedAddress": "嘉善路508号1-103A(嘉善路地铁站5号口步行340米)", "matchLevel": "兴趣点", "matchedName": "赛乐酒窖Cellar Door Wines(嘉善路店)"}, {"name": "麦斯汀酒吧whisky cocktail&coffee bar(西藏北路大悦城店)", "address": "西藏北路558号（近中兴路地铁站3号口）", "hours": "参考营业时间：周一至周日 19:00-02:00", "point": [121.469879, 31.250947], "matchedAddress": "西藏北路558号铭德国际广场2楼201号", "matchLevel": "楼栋附近（约定位）"}, {"name": "Latitude叁壹", "address": "茂名南路18号A", "hours": "参考营业时间：周二至周日 19:00-24:00（周一店休）", "point": [121.460182, 31.222507], "matchedAddress": "茂名南路18号A", "matchLevel": "兴趣点"}, {"name": "SU LOUNGE 24Bespoke(中港汇铂尔曼店)", "address": "打浦桥街道打浦路15号上海中港汇铂尔曼大酒店24楼", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.470494, 31.203909], "matchedAddress": "上海市黄浦区打浦桥街道打浦路15号上海中港汇铂尔曼大酒店(西南门)", "matchLevel": "兴趣点"}, {"name": "坠入Bistro·贵州创意菜(南京西路店)", "address": "凤阳路659号-1室", "hours": "参考营业时间：周五,周六 11:00-01:00 周一至周四 11:00-24:00 周日 11:00-16:00 17:00-24:00", "point": [121.463635, 31.231959], "matchedAddress": "上海市静安区凤阳路659", "matchLevel": "门牌号"}, {"name": "DEFUN得分酒吧(亚新广场店)", "address": "长寿路街道新会路亚新生活广场内1楼中庭（黑色建筑）", "hours": "参考营业时间：周一至周日 19:90-02:00", "point": [121.437639, 31.238704], "matchedAddress": "长寿路亚新生活广场一楼中庭DEFUN得分俱乐部", "matchLevel": "兴趣点", "matchedName": "DEFUN 得分俱乐部"}, {"name": "MOOD·homebar", "address": "人民路885号淮海中华大厦2010室", "hours": "参考营业时间：周一到周日：20:00-02:00", "point": [121.483349, 31.225531], "matchedAddress": "上海市黄浦区人民路885号淮海中华大厦", "matchLevel": "兴趣点"}, {"name": "VANFO·晚疯", "address": "打浦桥街道瑞金二路272号1号楼202室", "hours": "参考营业时间：周一至周日 19:00-01:00", "point": [121.466673, 31.207701], "matchedAddress": "打浦桥街道瑞金二路272号1号楼202室", "matchLevel": "兴趣点", "notice": "高德门店标注装修中，到店前请核实。"}, {"name": "芸颂酒窖Winsome Cellar(静安寺店)", "address": "南京西路街道北京西路1381号", "hours": "参考营业时间：周五,周六 11:00-01:00 周一至周四,周日 11:00-24:00", "point": [121.449116, 31.228271], "matchedAddress": "上海市静安区南京西路街道北京西路1381号", "matchLevel": "门牌号"}, {"name": "鲜啤30公里酒馆(大世界店)", "address": "大世界游乐中心宁海东路294号", "hours": "参考营业时间：周一至周日 15:00-02:00", "point": [121.479864, 31.227873], "matchedAddress": "上海市黄浦区宁海东路294号", "matchLevel": "门牌号"}, {"name": "醒象·酒馆", "address": "长寿路104-100号", "hours": "参考营业时间：周一至周日 15:00-24:00", "point": [121.442794, 31.243253], "matchedAddress": "上海市普陀区长寿路104号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(成都南路店)", "address": "瑞金二路街道成都南路111-113号", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.467714, 31.22153], "matchedAddress": "上海市黄浦区瑞金二路街道成都南路111号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(进贤路店)", "address": "进贤路172号1幢01室", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.69216, 31.192068], "matchedAddress": "上海市浦东新区进贤路172号", "matchLevel": "门牌号"}, {"name": "苏醒Revive Bar&Restaurant(西藏北路店)", "address": "西藏北路18号四行天地1层(曲阜路地铁站2号口步行160米)", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.472224, 31.241116], "matchedAddress": "上海市静安区西藏北路18号四行天地", "matchLevel": "兴趣点"}, {"name": "Lounge微醺Cocktail·Whisky·Bar", "address": "蒙自路207号12号楼(马当路地铁站3号口步行400米)", "hours": "参考营业时间：周一至周日 19:00-01:00", "point": [121.477451, 31.205989], "matchedAddress": "上海市黄浦区蒙自路207号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(亚新广场店)", "address": "长寿路街道新会路410、422号1楼6-106室", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.442486, 31.241611], "matchedAddress": "上海市普陀区长寿路街道新会路133号", "matchLevel": "门牌号"}, {"name": "小金鱼吐泡泡民谣小酒馆", "address": "建国中路6号(近南北高架)", "hours": "参考营业时间：周五至周六 19:00-01:00 （周日至周四店休）", "point": [121.470875, 31.210725], "matchedAddress": "建国中路与重庆南路辅路交叉口西80米", "matchLevel": "兴趣点", "matchedName": "小金鱼吐泡泡民谣小酒馆"}, {"name": "Pedal House Club(恒丰古北家苑店)", "address": "光复路865号", "hours": "参考营业时间：周一至周日 13:00-22:00", "geocodeIssue": "OK", "point": [121.457174, 31.238501], "matchedAddress": "光复路865号(汉中路地铁站10号口步行380米)", "matchLevel": "兴趣点"}, {"name": "Yoo78 Coffee&Bar", "address": "斜土路1111弄1-20号福华花苑", "hours": "参考营业时间：周一至周日 18:30-23:00", "point": [121.466474, 31.200875], "matchedAddress": "上海市徐汇区斜土路1111弄福华花苑(南门)", "matchLevel": "兴趣点"}, {"name": "YQ·mmm", "address": "南京西路街道威海路857号", "hours": "参考营业时间：周一至周日15:00-02:00", "point": [121.45573, 31.224712], "matchedAddress": "南京西路街道威海路857号", "matchLevel": "兴趣点"}, {"name": "弄点Bar", "address": "北站街道甘肃路32号", "hours": "参考营业时间：周一至周日20:00-2:00", "point": [121.474852, 31.242425], "matchedAddress": "甘肃路与曲阜路交叉口东南40米", "matchLevel": "兴趣点", "matchedName": "弄点Bar"}, {"name": "W BAR·Cocktail&Whiskey(新闸路店)", "address": "新闸路1304-1", "hours": "参考营业时间：周一至周日7点到12点", "point": [121.451666, 31.232004], "matchedAddress": "上海市静安区新闸路1304", "matchLevel": "门牌号"}, {"name": "Royal Flush Game Bar(长寿路店)", "address": "长寿路97号(江宁路地铁站4号口步行230米)", "hours": "参考营业时间：周一至周日19：30-2点", "geocodeIssue": "OK", "point": [121.443023, 31.243288], "matchedAddress": "长寿路97号(江宁路地铁站4号口步行230米)", "matchLevel": "楼栋附近（约定位）"}, {"name": "COPLUSDE 咖啡豆仓(襄阳南路店）", "address": "襄阳南路288号-2号", "hours": "参考营业时间：周一至周四20：00-2：00点 周五至周日21：00-3：00点", "point": [121.457648, 31.207907], "matchedAddress": "上海市徐汇区襄阳南路288号", "matchLevel": "门牌号"}, {"name": "GAGA·Game·威士忌 CLUB", "address": "北站街道海宁路939号", "hours": "参考营业时间：周一至周日 19：00-2：00", "point": [121.476732, 31.245903], "matchedAddress": "北站街道海宁路939号", "matchLevel": "兴趣点"}, {"name": "18G BAR", "address": "西康路850号D102室", "hours": "参考营业时间：周日至周四16:00-02:00周五周六16:00-04:00", "point": [121.443509, 31.237963], "matchedAddress": "上海市静安区西康路850号", "matchLevel": "门牌号"}, {"name": "Kisslab", "address": "威海路856(南京西路地铁站12号口步行410米)", "hours": "参考营业时间：工作日18:30-00:00 节假日18:30-2:00", "point": [121.465347, 31.227877], "matchedAddress": "上海市静安区威海路298号", "matchLevel": "门牌号"}, {"name": "拾贰时辰动力火车·home bar", "address": "南京东路街道六合路98号黄埔港路中心5楼", "hours": "参考营业时间：周一至周日20:00-02:00", "geocodeIssue": "OK", "point": [121.475007, 31.236587], "matchLevel": "同楼地址", "matchedAddress": "六合路98号"}, {"name": "Niche", "address": "巨鹿路405号", "hours": "参考营业时间 周一至周日19:30~0:00", "point": [121.459743, 31.222623], "matchedAddress": "上海市黄浦区巨鹿路405号", "matchLevel": "门牌号"}];const $=id=>document.getElementById(id);let origin=null,lastAccuracy=null;
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 0;border-bottom:1px solid var(--line);
+  font-size:12px;color:var(--ink-soft);
+}
+.brand{font-size:17px;font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:.5px}
+.brand span{font-size:10px;letter-spacing:2px;margin-left:8px;color:var(--brand);font-weight:400}
+
+.hero{padding:32px 0 22px}
+.eyebrow{font-size:12px;color:var(--brand);letter-spacing:1px;margin-bottom:10px}
+h1{
+  font-size:clamp(26px,6vw,34px);
+  line-height:1.35;margin:0 0 12px;letter-spacing:-.5px;font-weight:700;
+}
+.hero p{color:var(--ink-soft);line-height:1.75;margin:0;font-size:14px}
+.badges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.badges span{
+  border:1px solid var(--line);border-radius:6px;
+  padding:5px 10px;font-size:11px;color:var(--ink-soft);background:#fff;
+}
+
+.panel{
+  background:#fff;padding:18px;border:1px solid var(--line);
+  border-radius:12px;margin-bottom:24px;
+}
+.panel h2{font-size:15px;margin:0 0 8px;font-weight:700}
+#status{font-size:13px;color:var(--ink-soft);margin:0 0 12px;line-height:1.6}
+
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input:not([type=checkbox]){
+  background:var(--bg-soft);color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;
+  padding:12px 14px;font:inherit;min-width:160px;flex:1;
+}
+input:not([type=checkbox])::placeholder{color:#a89f92}
+button,select,.maplink{font:inherit;border:0;border-radius:8px;padding:11px 16px;cursor:pointer}
+button{background:var(--brand);color:#fff;font-weight:600;font-size:14px}
+button:hover{background:#a05618}
+button:disabled{opacity:.45;cursor:wait}
+.secondary,select{
+  background:#fff;color:var(--ink);border:1px solid var(--line);
+}
+.secondary:hover,select:hover{background:var(--bg-soft)}
+
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+summary{cursor:pointer;color:var(--brand);font-size:14px;font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"›";display:inline-block;margin-right:6px;transition:transform .2s;color:var(--brand)}
+details[open] summary::before{transform:rotate(90deg)}
+details p{font-size:13px;color:var(--ink-soft);line-height:1.7;margin:10px 0}
+
+a{color:var(--brand)}
+
+.listhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+.listhead h2{font-size:16px;margin:0;font-weight:700}
+small{font-weight:400;color:var(--ink-soft);font-size:11px}
+
+#coverage{font-size:12px;color:var(--ink-soft);margin:0 0 14px}
+
+.filters{margin:16px 0}
+label{white-space:nowrap;color:var(--ink-soft);font-size:13px}
+
+#list{display:grid;grid-template-columns:1fr;gap:10px}
+
+.card{
+  border:1px solid var(--line);background:#fff;border-radius:12px;
+  padding:16px 16px 14px;display:flex;flex-direction:column;gap:8px;
+  position:relative;
+}
+.card::before{
+  content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;
+  border-radius:0 3px 3px 0;background:var(--brand-soft);
+}
+.cardtop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.card h3{font-size:16px;line-height:1.5;margin:0;font-weight:700;padding-left:10px}
+
+.tag{display:none}
+
+.distance{
+  font-size:15px;font-weight:700;color:var(--brand);
+  white-space:nowrap;flex-shrink:0;
+}
+.card p{font-size:13px;margin:0;color:var(--ink-soft);line-height:1.6;padding-left:10px}
+.card p:first-of-type{color:var(--ink)}
+
+.card small{margin:0;font-size:11px;color:#a89f92;padding-left:10px}
+
+.actions{display:flex;gap:8px;margin-top:4px;padding-left:10px}
+.maplink{
+  font-size:13px;text-decoration:none;display:inline-block;
+  border:1px solid var(--brand);color:var(--brand);background:#fff;
+  padding:7px 14px;border-radius:8px;font-weight:600;
+}
+.maplink:hover{background:var(--brand-soft)}
+
+#placeholder{
+  padding:28px 20px;color:var(--ink-soft);font-size:13px;line-height:1.7;
+  border:1px dashed var(--line);border-radius:12px;text-align:center;background:#fff;
+}
+
+.place-option{
+  width:100%;display:flex;flex-direction:column;align-items:flex-start;
+  text-align:left;gap:4px;margin-top:8px;
+  background:var(--bg-soft);color:var(--ink);
+  border:1px solid var(--line);padding:12px 14px;border-radius:8px;
+}
+.place-option span{font-size:12px;color:var(--ink-soft)}
+.place-option:hover{background:var(--brand-soft);border-color:var(--brand)}
+.place-option strong{font-size:14px}
+
+#placeResults{margin-top:8px}
+
+footer{
+  font-size:11px;color:#a89f92;line-height:1.9;
+  padding:28px 0 40px;border-top:1px solid var(--line);margin-top:20px;
+}
+
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;
+}
+
+@media(max-width:640px){
+  main{padding:0 14px 8px}
+  header{font-size:11px}
+  .brand{font-size:16px}
+  .brand span{display:none}
+  .hero{padding:26px 0 18px}
+  .panel{padding:16px}
+  .row>button{flex-grow:1}
+  .badges span{font-size:10px}
+  .filters input{width:100%}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a class="brand" href="./">酒鬼地图暖心版<span>上海 · 26五期</span></a>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">下一杯，就在附近</div>
+  <h1>最近的 5 家，帮你找好了</h1>
+  <p>允许定位后，自动按距离排序。只看本期参与酒馆。</p>
+</section>
+
+<section class="panel">
+  <h2>你的位置</h2>
+  <p id="status" role="status" aria-live="polite">正在准备定位…</p>
+  <button id="locate">重新定位</button>
+  <details id="manual" open>
+    <summary>输入地点，查找附近酒馆</summary>
+    <p>使用高德搜索地铁站、商场、学校、酒店等地点，选择正确结果后显示最近5家。</p>
+    <div class="row">
+      <input id="origin" aria-label="出发点" placeholder="例如：人民广场、静安寺、上海科技大学">
+      <button id="go">搜索地点</button>
+    </div>
+  </details>
+</section>
+
+<section>
+  <div class="listhead">
+    <h2 id="resultTitle">附近参与酒馆</h2>
+  </div>
+  <p id="coverage"></p>
+  <div id="placeholder">正在等待位置授权，取得位置后自动显示最近5家。</div>
+  <div id="list" aria-live="polite"></div>
+</section>
+
+<footer>
+  非官方辅助工具 · 名单来自酒鬼巡游记「上海26五期」，共91条门店记录，采集于2026.11.09，页面显示使用截止日2026.12.21。<br>
+  显示的是直线距离，并非步行或行车路程；店铺地址、活动资格与营业时间请到店前核实。定位权限由浏览器和手机系统控制。<br>
+  地点搜索由高德地图提供。点击搜索时，地点关键词会发送至高德；自动定位坐标与距离计算保留在本机。
+</footer>
+</main>
+
+<script>
+window.BARS=[{"name": "榴芒·叙事·桌游&社交聚会homebar", "address": "大学路21710楼1001室", "hours": "参考营业时间：周一到周日 16:00～02:00", "point": [121.509186, 31.303694], "matchedAddress": "大学路217号602室(江湾体育场地铁站9号口步行350米)", "matchLevel": "楼栋附近（约定位）"}, {"name": "Pinch cafe&bar", "address": "建国西路283号尚街Loft5号楼105室", "hours": "参考营业时间：周一至周日18.00-02.00", "point": [121.45838, 31.204968], "matchedAddress": "上海市徐汇区建国西路283号", "matchLevel": "门牌号"}, {"name": "Project W 威士忌·鸡尾酒", "address": "襄阳北路17号-1（襄乐大厦1楼-1、襄阳北路与巨鹿路交叉口南行200米路东）", "hours": "参考营业时间：周一至周日 19:30一01:00 周五周六21.30之后特殊情况需要外带", "point": [121.454696, 31.220081], "matchedAddress": "襄阳北路17号", "matchLevel": "兴趣点", "matchedName": "PROJECT W(襄乐大厦店)"}, {"name": "FLOYD BAR·桌游社交", "address": "上海市杨浦区五角场街道创智66商务楼锦创路20号8楼", "hours": "参考营业时间：周一到周日19：00-02：00", "geocodeIssue": "OK", "point": [121.509225, 31.304225], "matchLevel": "同楼地址", "matchedAddress": "锦创路20号"}, {"name": "ASC Wine Atelier醇艺坊(上海店)", "address": "江西中路215号", "hours": "参考营业时间：周一到周日 13：00-21：00", "point": [121.48835, 31.236373], "matchedAddress": "上海市黄浦区江西中路215号", "matchLevel": "门牌号"}, {"name": "上海力波·精酿鲜啤馆(耀华滨江公寓店)", "address": "上钢新村街道济明路431号耀华逸坊1层B室", "hours": "参考营业时间 周一至周日17:00-01:00", "point": [121.475399, 31.170974], "matchedAddress": "上海市浦东新区上钢新村街道济明路431号", "matchLevel": "门牌号"}, {"name": "Double S", "address": "绍兴路100号", "hours": "参考营业时间：周一至周日 20:00-01:30", "point": [121.462448, 31.208774], "matchedAddress": "绍兴路100号", "matchLevel": "兴趣点"}, {"name": "THE HOLE IN THE WALL", "address": "昌平路653号(昌平路地铁站4号口步行270米)", "hours": "参考营业时间：周一至周日 19:30-02:00", "point": [121.444118, 31.232977], "matchedAddress": "上海市静安区昌平路653号", "matchLevel": "门牌号"}, {"name": "这没HomeBar&Dance(人广首店)", "address": "六合路98号港陆黄浦中心5A", "hours": "参考营业时间：周一至周四,周日 20:00-01:30 周五,周六 20:00-02:00", "point": [121.475007, 31.236587], "matchedAddress": "上海市黄浦区六合路98号港陆黄浦中心", "matchLevel": "兴趣点"}, {"name": "Glimmer Six", "address": "大沽路386-1", "hours": "参考营业时间：周五六16:00-23:00 周日到周一16:00-02:00", "point": [121.464686, 31.225562], "matchedAddress": "上海市静安区大沽路436号", "matchLevel": "门牌号"}, {"name": "DaGa嗒嘎·homebar(长宁龙之梦店)", "address": "华阳路街道长宁路1018号17楼1706室", "hours": "参考营业时间：周二至周日 20:00-02:00（周一店休）", "point": [121.416664, 31.219084], "matchedAddress": "华阳路街道长宁路1018号17楼1706室", "matchLevel": "兴趣点", "matchedName": "DaGa嗒嘎·homebar(长宁龙之梦店)"}, {"name": "M7 Play Bar VISTA酒吧", "address": "常德路1240号", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.436309, 31.240901], "matchedAddress": "上海市普陀区常德路1240号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(陕康里店)", "address": "陕西北路812-2号", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.448568, 31.234877], "matchedAddress": "上海市静安区陕西北路812号", "matchLevel": "门牌号"}, {"name": "PRE DRINK不误正夜(成都南路店)", "address": "成都南路122号", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.467625, 31.221725], "matchedAddress": "成都南路122号", "matchLevel": "兴趣点", "matchedName": "PRE-DRINK 不误正夜(成都南路店)"}, {"name": "LastDrop 福根儿", "address": "陕西北路549号-7室", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.451636, 31.231558], "matchedAddress": "上海市静安区陕西北路549", "matchLevel": "门牌号"}, {"name": "PRE DRINK不误正夜(陕西南路店)", "address": "陕西南路90号", "hours": "参考营业时间：周一至周日18:00-02:00", "point": [121.457898, 31.219147], "matchedAddress": "上海市徐汇区陕西南路188弄", "matchLevel": "门牌号"}, {"name": "SIDE BAR 飞镖主题运动吧", "address": "茂名南路56号食尚谷SIDE BAR飞镖运动酒吧", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.460161, 31.221365], "matchedAddress": "上海市黄浦区茂名南路56号食尚谷SIDE BAR", "matchLevel": "兴趣点"}, {"name": "8PINTS八品脱·小花园餐酒吧(漕宝路店)", "address": "漕宝路36号2号楼C单元103室", "hours": "参考营业时间：周一至周日11:00-02:00", "point": [121.349754, 31.156112], "matchedAddress": "上海市闵行区漕宝路36号", "matchLevel": "门牌号"}, {"name": "云山之藤(久光店)", "address": "南京西路1618号久光百货5楼", "hours": "参考营业时间：周一至周日14:00-21:30", "point": [121.445889, 31.223647], "matchedAddress": "南京西路1618号久光百货5楼(静安寺地铁站出入口旁)", "matchLevel": "兴趣点", "matchedName": "云山之藤(久光店)"}, {"name": "幸福里homebar•年轻社交空间", "address": "定西路1016号银统大厦北楼1012号", "hours": "参考营业时间：周二至周日 20:00-01:30 周五、周六 20:00-02:00 (周一店休)", "point": [121.423835, 31.210906], "matchedAddress": "上海市长宁区定西路1016号银统大厦北楼", "matchLevel": "兴趣点"}, {"name": "隐·九 BAR&COFFEE&TEA", "address": "淡水路250号(一大会址·新天地地铁站5号口步行220米)", "hours": "参考营业时间：周一至周日 19:00-02:00", "point": [121.473042, 31.216707], "matchedAddress": "上海市黄浦区淡水路250号", "matchLevel": "门牌号"}, {"name": "W BAR·Shisha民谣鸡尾酒吧(长寿路店)", "address": "莫干山路50号3-107WArt&Bistro艺术酒馆", "hours": "参考营业时间：周一至周日 19:00-01:00", "point": [121.448919, 31.247568], "matchedAddress": "莫干山路50号创意园内3-107 We Bar", "matchLevel": "兴趣点", "matchedName": "W BAR艺术民谣鸡尾酒吧(M50店)"}, {"name": "把酒不离喰 烧鸟&GODY BREW精酿酒吧(西藏北路店)", "address": "西藏北路205-1号(曲阜路地铁站1号口步行130米)", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.471338, 31.241937], "matchedAddress": "上海市静安区西藏北路75号", "matchLevel": "门牌号"}, {"name": "阿光的奶酒铺(锦灏佳园店)", "address": "锦灏佳园西北2门旁(延长路地铁站2号口步行340米)", "hours": "参考营业时间：周一至周日 17:30-02:00", "point": [121.459221, 31.272579], "matchedAddress": "锦灏佳园西北2门旁(延长路地铁站2号口步行340米)", "matchLevel": "兴趣点", "matchedName": "阿光的奶酒铺(锦灏佳园店)"}, {"name": "聚野Taproom", "address": "威海路870号", "hours": "参考营业时间：周一至周日 19:00-01:00", "point": [121.455276, 31.224601], "matchedAddress": "威海路870号(威海路888弄小区正门旁)", "matchLevel": "兴趣点"}, {"name": "魔女喝喝精酿酒屋(静安店)", "address": "武定路535号", "hours": "参考营业时间：周一至周日10:00-02:00", "point": [121.450131, 31.232877], "matchedAddress": "上海市静安区武定路535号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(襄阳北路店)", "address": "襄阳北路1号", "hours": "参考营业时间：周一至周日17:00-02:00", "point": [121.454283, 31.221], "matchedAddress": "襄阳北路1号", "matchLevel": "兴趣点", "matchedName": "DASH LAND(襄阳北路店)"}, {"name": "724 Music Bar(灵石路店)", "address": "灵石路699号2号楼104室", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.445761, 31.283446], "matchedAddress": "上海市静安区灵石路699号", "matchLevel": "门牌号"}, {"name": "温暖的家Warm House(大学路店)", "address": "上海市杨浦区锦创路20号502室", "hours": "参考营业时间：周一至周日 18:00-02:00", "point": [121.509225, 31.304225], "matchedAddress": "锦创路与大学路交叉口北40米", "matchLevel": "兴趣点", "matchedName": "温暖的家Warm House水烟吧(大学路店)"}, {"name": "魔女喝喝酒集(徐汇店)", "address": "石龙路659号", "hours": "参考营业时间：周一至周日 11:00-02:00", "point": [121.434291, 31.152058], "matchedAddress": "上海市徐汇区石龙路659号", "matchLevel": "门牌号"}, {"name": "桥Pub·1店(武宁路桥店)", "address": "光复西路与谈家渡路交叉口东20米", "hours": "参考营业时间：周一至周日 10:00-01:00", "point": [121.425731, 31.236478], "matchedAddress": "光复西路与谈家渡路交叉口东20米", "matchLevel": "兴趣点", "matchedName": "桥Pub·桥洞空间·早C晚A"}, {"name": "夜航Homebar·拼豆手作·微醺酒馆", "address": "延安西路777号裕丰国际大厦701室", "hours": "参考营业时间：周五,周六 19:30-02:00 周二至周四,周日 19:30-24:00", "point": [121.434578, 31.214108], "matchedAddress": "上海市长宁区延安西路777号裕丰国际大厦", "matchLevel": "兴趣点"}, {"name": "斋飞·homebar·年轻社交空间", "address": "延安西路777号裕丰国际大厦1604", "hours": "参考营业时间：周一至周日 21:00-02:00", "point": [121.434578, 31.214108], "matchedAddress": "上海市长宁区延安西路777号裕丰国际大厦", "matchLevel": "兴趣点"}, {"name": "Cs酒吧", "address": "定西路685号新华商务大楼B1层", "hours": "参考营业时间：周一至周日 19:30-02:00", "point": [121.423507, 31.206789], "matchedAddress": "上海市长宁区定西路685号新华商务大楼", "matchLevel": "兴趣点"}, {"name": "半醒bar家庭式酒馆home bar", "address": "长寿路1118号悦达国际大厦A座15B", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.427097, 31.230685], "matchedAddress": "长寿路1118号悦达国际大厦A座L1层", "matchLevel": "兴趣点", "matchedName": "半醒bar家庭式酒馆"}, {"name": "cheerful轮滑桌游唱歌酒吧·轰趴团建", "address": "迪美购物中心北门负一层262、270商铺", "hours": "参考营业时间：周一至周日 11:00-24:00", "point": [121.473411, 31.228569], "matchedAddress": "上海市黄浦区上海迪美购物中心(北门)", "matchLevel": "兴趣点"}, {"name": "Cantona&bar(万航渡路店)", "address": "万航渡路457号", "hours": "参考营业时间：周一至周日 16:30-02:00", "point": [121.436046, 31.225134], "matchedAddress": "上海市静安区万航渡路457号", "matchLevel": "门牌号"}, {"name": "TRK·达鲁酷运动餐酒吧", "address": "公平路209号友邦金融中心地下二层LG2层201号", "hours": "参考营业时间：周一至周日 11:30-22:00", "point": [121.504533, 31.254831], "matchedAddress": "上海市虹口区公平路209号", "matchLevel": "门牌号"}, {"name": "筝歌啤酒屋(巨鹿路店)", "address": "巨鹿路360-8号", "hours": "参考营业时间：周五,周六 18:00-02:00 周一 20:00-01:00 周二至周四,周日 18:00-01:00", "point": [121.458325, 31.222584], "matchedAddress": "上海市黄浦区巨鹿路360号", "matchLevel": "门牌号"}, {"name": "筝歌啤酒屋(静安店)", "address": "康定路856号", "hours": "参考营业时间：周二至周日 18:00-23:00（周一店休）", "point": [121.441918, 31.231477], "matchedAddress": "上海市静安区康定路856号", "matchLevel": "门牌号"}, {"name": "8PINTS八品脱·精酿碳烤餐吧·后门Home bar·17点出餐(胶州路店)", "address": "胶州路633号一层（地铁7号线5号口出来直走过马路就是）", "hours": "参考营业时间：周一至周日 15:00-24:00", "point": [121.43906, 31.233484], "matchedAddress": "上海市静安区胶州路633号", "matchLevel": "门牌号"}, {"name": "Ginnan龙猫Cocktail水烟Bar", "address": "康定路211号1楼D室（江宁路466-3 江宁路康定路路口转角）", "hours": "参考营业时间：周一至周日 18:30-02:00", "point": [121.452311, 31.235772], "matchedAddress": "上海市静安区康定路211号", "matchLevel": "门牌号"}, {"name": "VESPER Whiskey&Cocktail Bar(睿园店)", "address": "桂平路353号F座103B", "hours": "参考营业时间：周一至周日 19:00-01:30", "point": [121.405004, 31.161758], "matchedAddress": "桂平路353号越界睿园F座104", "matchLevel": "楼栋附近（约定位）"}, {"name": "鹿鳴·塔罗主题鸡尾酒吧", "address": "大宁路735号", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.449252, 31.272836], "matchedAddress": "上海市静安区大宁路610弄", "matchLevel": "门牌号"}, {"name": "古仓单一麦芽威士忌俱乐部", "address": "南京东路139号美伦大楼4层M405室", "hours": "参考营业时间：周一至周日 15:00-22:00", "point": [121.486928, 31.237881], "matchedAddress": "上海市黄浦区南京路步行街139号美伦大楼", "matchLevel": "兴趣点"}, {"name": "有楽yolo的小屋派对轰趴·生日团建·Homebar(外滩店）", "address": "南苏州路933号怡水豪庭26楼2603室", "hours": "参考营业时间：周五,周六 20:30-02:00 周二至周四,周日 20:30-01:30", "point": [121.474353, 31.240817], "matchedAddress": "上海市黄浦区南苏州路933号怡水豪庭(西北门)", "matchLevel": "兴趣点"}, {"name": "Cloud·SU LOUNGE the bund", "address": "中山东二路600号复星艺术中心4楼", "hours": "参考营业时间：周一至周日 19:00-01:30", "point": [121.497861, 31.226799], "matchedAddress": "上海市黄浦区中山东二路600号复星艺术中心(西门)", "matchLevel": "兴趣点"}, {"name": "野果与山椒·贵州料理Chill chili(富民路店)", "address": "富民路177号", "hours": "参考营业时间：周一至周日 11:30-02:00", "point": [121.451546, 31.218527], "matchedAddress": "上海市静安区富民路177号", "matchLevel": "门牌号"}, {"name": "满是福德Homebar城市社交空间(淮海店)", "address": "淮海中华大厦2306室", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.483349, 31.225531], "matchedAddress": "上海市黄浦区淮海中华大厦", "matchLevel": "兴趣点"}, {"name": "小公馆 Lafayette1315Bar", "address": "复兴中路1315号", "hours": "参考营业时间：周一至周日 11:00-23:00", "point": [121.454867, 31.211905], "matchedAddress": "复兴中路1315号-1", "matchLevel": "兴趣点"}, {"name": "Pigs Home家庭式酒吧(定西路店)", "address": "定西路1016号2101A", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.422903, 31.210873], "matchedAddress": "上海市长宁区定西路1016号", "matchLevel": "门牌号"}, {"name": "Alive活着", "address": "同心路723号德必7街区A座一楼M9（巷子走到底）", "hours": "参考营业时间：周五至周日 20:00-02:00 周一至周四 20:00-24:00", "point": [121.473501, 31.270051], "matchedAddress": "同心路723号德必7街区A座一楼M9(巷子走到底)", "matchLevel": "兴趣点", "matchedName": "Alive Bar"}, {"name": "Black vine pub 黑蔓酒吧", "address": "政民路230-4号沿街", "hours": "参考营业时间：周一至周日 17:30-02:00", "point": [121.506433, 31.302424], "matchedAddress": "上海市杨浦区政民路230号", "matchLevel": "门牌号"}, {"name": "LB微醺人才培训中心·bar", "address": "丹巴路苏宁天御国际广场B1座1206室", "hours": "参考营业时间：周二至周日 21:00-02:00", "geocodeIssue": "OK", "point": [121.380375, 31.223425], "matchedAddress": "丹巴路99号(近光复西路)苏宁·天御国际广场", "matchLevel": "楼栋附近（约定位）"}, {"name": "离线Homebar·家庭酒馆", "address": "大学路307号502室", "hours": "参考营业时间：周二至周日 20:00-02:00", "point": [121.507627, 31.303165], "matchedAddress": "上海市杨浦区大学路307号", "matchLevel": "门牌号"}, {"name": "有乐YOLO HOMEBAR", "address": "南苏州路933号怡水豪庭26楼2603室", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.474353, 31.240817], "matchedAddress": "上海市黄浦区南苏州路933号怡水豪庭(西北门)", "matchLevel": "兴趣点"}, {"name": "Brew&Tipsy Cafe", "address": "福泉路52号（宜家对面）", "hours": "参考营业时间：周日至周一18.00到01:00 周五周六18:00至02:00", "geocodeIssue": "OK", "point": [121.35783, 31.222205], "matchedAddress": "金钟路658-17号楼", "matchLevel": "地图门店（地址待核实）"}, {"name": "ANOTHER9(永昌大厦店)", "address": "余姚路27号", "hours": "参考营业时间：周一至周日 19:00-02:00", "point": [121.443786, 31.23612], "matchedAddress": "余姚路27号", "matchLevel": "兴趣点", "matchedName": "Another9(永昌大厦店)"}, {"name": "小亲新清酒社", "address": "永康路120号2楼空间", "hours": "参考营业时间：周一至周日 16:00-00:30", "point": [121.457025, 31.210675], "matchedAddress": "永康路120号2层", "matchLevel": "兴趣点"}, {"name": "Golang•md Bar(西岸梦中心店)", "address": "龙华街道GateM西岸梦中心10栋（滑板公园旁）", "hours": "参考营业时间：周一至周日 10:00-24:00", "geocodeIssue": "OK", "point": [121.46615, 31.159469], "matchedAddress": "龙腾大道2266号Gate M西岸梦中心10幢一层115-116单元", "matchLevel": "楼栋附近（约定位）"}, {"name": "卓X·研酒工坊", "address": "中山北路2790号杰地大厦五楼503-504室", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.418491, 31.2408], "matchedAddress": "上海市普陀区中山北路2790号杰地大厦(西北门)", "matchLevel": "兴趣点"}, {"name": "MENTAN 漫啖", "address": "南昌路264号", "hours": "参考营业时间：周三至周一 19:30-01:30 （周二店休）", "point": [121.463747, 31.217548], "matchedAddress": "上海市黄浦区南昌路264号", "matchLevel": "门牌号"}, {"name": "赛乐酒窖Cellar Door Wines(嘉善路店)", "address": "嘉善路508号尚街园区103A", "hours": "参考营业时间：周日 13:00-22:00 周一至周六 11:00-22:00", "point": [121.460004, 31.204469], "matchedAddress": "嘉善路508号1-103A(嘉善路地铁站5号口步行340米)", "matchLevel": "兴趣点", "matchedName": "赛乐酒窖Cellar Door Wines(嘉善路店)"}, {"name": "麦斯汀酒吧whisky cocktail&coffee bar(西藏北路大悦城店)", "address": "西藏北路558号（近中兴路地铁站3号口）", "hours": "参考营业时间：周一至周日 19:00-02:00", "point": [121.469879, 31.250947], "matchedAddress": "西藏北路558号铭德国际广场2楼201号", "matchLevel": "楼栋附近（约定位）"}, {"name": "Latitude叁壹", "address": "茂名南路18号A", "hours": "参考营业时间：周二至周日 19:00-24:00（周一店休）", "point": [121.460182, 31.222507], "matchedAddress": "茂名南路18号A", "matchLevel": "兴趣点"}, {"name": "SU LOUNGE 24Bespoke(中港汇铂尔曼店)", "address": "打浦桥街道打浦路15号上海中港汇铂尔曼大酒店24楼", "hours": "参考营业时间：周一至周日 20:00-02:00", "point": [121.470494, 31.203909], "matchedAddress": "上海市黄浦区打浦桥街道打浦路15号上海中港汇铂尔曼大酒店(西南门)", "matchLevel": "兴趣点"}, {"name": "坠入Bistro·贵州创意菜(南京西路店)", "address": "凤阳路659号-1室", "hours": "参考营业时间：周五,周六 11:00-01:00 周一至周四 11:00-24:00 周日 11:00-16:00 17:00-24:00", "point": [121.463635, 31.231959], "matchedAddress": "上海市静安区凤阳路659", "matchLevel": "门牌号"}, {"name": "DEFUN得分酒吧(亚新广场店)", "address": "长寿路街道新会路亚新生活广场内1楼中庭（黑色建筑）", "hours": "参考营业时间：周一至周日 19:90-02:00", "point": [121.437639, 31.238704], "matchedAddress": "长寿路亚新生活广场一楼中庭DEFUN得分俱乐部", "matchLevel": "兴趣点", "matchedName": "DEFUN 得分俱乐部"}, {"name": "MOOD·homebar", "address": "人民路885号淮海中华大厦2010室", "hours": "参考营业时间：周一到周日：20:00-02:00", "point": [121.483349, 31.225531], "matchedAddress": "上海市黄浦区人民路885号淮海中华大厦", "matchLevel": "兴趣点"}, {"name": "VANFO·晚疯", "address": "打浦桥街道瑞金二路272号1号楼202室", "hours": "参考营业时间：周一至周日 19:00-01:00", "point": [121.466673, 31.207701], "matchedAddress": "打浦桥街道瑞金二路272号1号楼202室", "matchLevel": "兴趣点", "notice": "高德门店标注装修中，到店前请核实。"}, {"name": "芸颂酒窖Winsome Cellar(静安寺店)", "address": "南京西路街道北京西路1381号", "hours": "参考营业时间：周五,周六 11:00-01:00 周一至周四,周日 11:00-24:00", "point": [121.449116, 31.228271], "matchedAddress": "上海市静安区南京西路街道北京西路1381号", "matchLevel": "门牌号"}, {"name": "鲜啤30公里酒馆(大世界店)", "address": "大世界游乐中心宁海东路294号", "hours": "参考营业时间：周一至周日 15:00-02:00", "point": [121.479864, 31.227873], "matchedAddress": "上海市黄浦区宁海东路294号", "matchLevel": "门牌号"}, {"name": "醒象·酒馆", "address": "长寿路104-100号", "hours": "参考营业时间：周一至周日 15:00-24:00", "point": [121.442794, 31.243253], "matchedAddress": "上海市普陀区长寿路104号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(成都南路店)", "address": "瑞金二路街道成都南路111-113号", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.467714, 31.22153], "matchedAddress": "上海市黄浦区瑞金二路街道成都南路111号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(进贤路店)", "address": "进贤路172号1幢01室", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.69216, 31.192068], "matchedAddress": "上海市浦东新区进贤路172号", "matchLevel": "门牌号"}, {"name": "苏醒Revive Bar&Restaurant(西藏北路店)", "address": "西藏北路18号四行天地1层(曲阜路地铁站2号口步行160米)", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.472224, 31.241116], "matchedAddress": "上海市静安区西藏北路18号四行天地", "matchLevel": "兴趣点"}, {"name": "Lounge微醺Cocktail·Whisky·Bar", "address": "蒙自路207号12号楼(马当路地铁站3号口步行400米)", "hours": "参考营业时间：周一至周日 19:00-01:00", "point": [121.477451, 31.205989], "matchedAddress": "上海市黄浦区蒙自路207号", "matchLevel": "门牌号"}, {"name": "DASH LAND 大师兰德鸡尾酒吧(亚新广场店)", "address": "长寿路街道新会路410、422号1楼6-106室", "hours": "参考营业时间：周一至周日 17:00-02:00", "point": [121.442486, 31.241611], "matchedAddress": "上海市普陀区长寿路街道新会路133号", "matchLevel": "门牌号"}, {"name": "小金鱼吐泡泡民谣小酒馆", "address": "建国中路6号(近南北高架)", "hours": "参考营业时间：周五至周六 19:00-01:00 （周日至周四店休）", "point": [121.470875, 31.210725], "matchedAddress": "建国中路与重庆南路辅路交叉口西80米", "matchLevel": "兴趣点", "matchedName": "小金鱼吐泡泡民谣小酒馆"}, {"name": "Pedal House Club(恒丰古北家苑店)", "address": "光复路865号", "hours": "参考营业时间：周一至周日 13:00-22:00", "geocodeIssue": "OK", "point": [121.457174, 31.238501], "matchedAddress": "光复路865号(汉中路地铁站10号口步行380米)", "matchLevel": "兴趣点"}, {"name": "Yoo78 Coffee&Bar", "address": "斜土路1111弄1-20号福华花苑", "hours": "参考营业时间：周一至周日 18:30-23:00", "point": [121.466474, 31.200875], "matchedAddress": "上海市徐汇区斜土路1111弄福华花苑(南门)", "matchLevel": "兴趣点"}, {"name": "YQ·mmm", "address": "南京西路街道威海路857号", "hours": "参考营业时间：周一至周日15:00-02:00", "point": [121.45573, 31.224712], "matchedAddress": "南京西路街道威海路857号", "matchLevel": "兴趣点"}, {"name": "弄点Bar", "address": "北站街道甘肃路32号", "hours": "参考营业时间：周一至周日20:00-2:00", "point": [121.474852, 31.242425], "matchedAddress": "甘肃路与曲阜路交叉口东南40米", "matchLevel": "兴趣点", "matchedName": "弄点Bar"}, {"name": "W BAR·Cocktail&Whiskey(新闸路店)", "address": "新闸路1304-1", "hours": "参考营业时间：周一至周日7点到12点", "point": [121.451666, 31.232004], "matchedAddress": "上海市静安区新闸路1304", "matchLevel": "门牌号"}, {"name": "Royal Flush Game Bar(长寿路店)", "address": "长寿路97号(江宁路地铁站4号口步行230米)", "hours": "参考营业时间：周一至周日19：30-2点", "geocodeIssue": "OK", "point": [121.443023, 31.243288], "matchedAddress": "长寿路97号(江宁路地铁站4号口步行230米)", "matchLevel": "楼栋附近（约定位）"}, {"name": "COPLUSDE 咖啡豆仓(襄阳南路店）", "address": "襄阳南路288号-2号", "hours": "参考营业时间：周一至周四20：00-2：00点 周五至周日21：00-3：00点", "point": [121.457648, 31.207907], "matchedAddress": "上海市徐汇区襄阳南路288号", "matchLevel": "门牌号"}, {"name": "GAGA·Game·威士忌 CLUB", "address": "北站街道海宁路939号", "hours": "参考营业时间：周一至周日 19：00-2：00", "point": [121.476732, 31.245903], "matchedAddress": "北站街道海宁路939号", "matchLevel": "兴趣点"}, {"name": "18G BAR", "address": "西康路850号D102室", "hours": "参考营业时间：周日至周四16:00-02:00周五周六16:00-04:00", "point": [121.443509, 31.237963], "matchedAddress": "上海市静安区西康路850号", "matchLevel": "门牌号"}, {"name": "Kisslab", "address": "威海路856(南京西路地铁站12号口步行410米)", "hours": "参考营业时间：工作日18:30-00:00 节假日18:30-2:00", "point": [121.465347, 31.227877], "matchedAddress": "上海市静安区威海路298号", "matchLevel": "门牌号"}, {"name": "拾贰时辰动力火车·home bar", "address": "南京东路街道六合路98号黄埔港路中心5楼", "hours": "参考营业时间：周一至周日20:00-02:00", "geocodeIssue": "OK", "point": [121.475007, 31.236587], "matchLevel": "同楼地址", "matchedAddress": "六合路98号"}, {"name": "Niche", "address": "巨鹿路405号", "hours": "参考营业时间 周一至周日19:30~0:00", "point": [121.459743, 31.222623], "matchedAddress": "上海市黄浦区巨鹿路405号", "matchLevel": "门牌号"}];
+
+const $=id=>document.getElementById(id);
+let origin=null,lastAccuracy=null;
+
 function distance(a,b){const r=Math.PI/180,x=(b[1]-a[1])*r,y=(b[0]-a[0])*r;return 6371*2*Math.asin(Math.min(1,Math.sqrt(Math.sin(x/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(y/2)**2)))}
 function nearest(rows,p){return rows.filter(b=>Array.isArray(b.point)&&b.point.length===2&&b.point.every(Number.isFinite)).map(b=>({...b,km:distance(p,b.point)})).sort((a,b)=>a.km-b.km).slice(0,5)}
 function message(s){$('status').textContent=s}
-function show(){if(!origin)return;const selected=nearest(window.BARS,origin),mapped=window.BARS.filter(b=>b.point).length;$('list').replaceChildren();$('resultTitle').textContent='离你最近的 '+selected.length+' 家';$('coverage').textContent='已匹配坐标 '+mapped+' / '+window.BARS.length+' 家'+(mapped<window.BARS.length?' · 未匹配门店不参与排名，当前结果可能不完整':'');selected.forEach((b,i)=>{const card=document.createElement('article');card.className='card';const tag=document.createElement('div');tag.className='tag';tag.textContent='NEAREST 0'+(i+1)+' · 上海26五期';const h=document.createElement('h3');h.textContent=b.name;const d=document.createElement('strong');d.className='distance';d.textContent='直线距离 '+(b.km<1?Math.round(b.km*1000)+' 米':b.km.toFixed(2)+' 公里');const addr=document.createElement('p');addr.textContent=b.address;const time=document.createElement('p');time.textContent=b.hours;const link=document.createElement('a');link.className='maplink';link.textContent='查看地图与路线 ↗';link.href='https://uri.amap.com/marker?position='+b.point.join(',')+'&name='+encodeURIComponent(b.name)+'&coordinate=gaode&callnative=1';link.rel='noopener';const info=document.createElement('small');info.textContent='坐标按'+(b.matchLevel||'门店位置')+'匹配，实际路程以地图为准';card.append(tag,h,d,addr,time,info,link);$('list').append(card)});$('placeholder').hidden=true;message('已按直线距离从近到远排序。'+(lastAccuracy?'定位精度约 '+Math.round(lastAccuracy)+' 米。':''))}
-// Browser geolocation is WGS84; AMap coordinates use GCJ02.
-function gcj(lng,lat){if(lng<72.004||lng>137.8347||lat<.8293||lat>55.8271)return[lng,lat];const pi=Math.PI,x=lng-105,y=lat-35;let a=-100+2*x+3*y+.2*y*y+.1*x*y+.2*Math.sqrt(Math.abs(x)),b=300+x+2*y+.1*x*x+.1*x*y+.1*Math.sqrt(Math.abs(x));a+=(20*Math.sin(6*x*pi)+20*Math.sin(2*x*pi))*2/3;a+=(20*Math.sin(y*pi)+40*Math.sin(y/3*pi))*2/3;a+=(160*Math.sin(y/12*pi)+320*Math.sin(y*pi/30))*2/3;b+=(20*Math.sin(6*x*pi)+20*Math.sin(2*x*pi))*2/3;b+=(20*Math.sin(x*pi)+40*Math.sin(x/3*pi))*2/3;b+=(150*Math.sin(x/12*pi)+300*Math.sin(x/30*pi))*2/3;const rad=lat/180*pi,m=1-.006693421622965943*Math.sin(rad)**2,sm=Math.sqrt(m);return[lng+b*180/(6378245/sm*Math.cos(rad)*pi),lat+a*180/((6378245*(1-.006693421622965943))/(m*sm)*pi)]}
-function locate(){const run=++positionRun;if(!navigator.geolocation){failure('此浏览器不支持定位');return}if(!window.isSecureContext){failure('自动定位需要 HTTPS 网页，请使用正式网页链接');return}$('locate').disabled=true;message('正在定位，请在系统提示中允许位置权限…');navigator.geolocation.getCurrentPosition(p=>{if(run!==positionRun)return;$('locate').disabled=false;origin=gcj(p.coords.longitude,p.coords.latitude);lastAccuracy=p.coords.accuracy;show();if(p.coords.longitude<120.7||p.coords.longitude>122.3||p.coords.latitude<30.6||p.coords.latitude>31.95)message('当前位置在上海范围外；仍显示离你最近的上海参与门店。')},e=>{if(run!==positionRun)return;$('locate').disabled=false;failure(e.code===1?'位置权限未开启':e.code===3?'定位超时':'暂时无法取得位置')},{enableHighAccuracy:true,timeout:18000,maximumAge:30000})}
-function failure(s){message(s+'。可点击“重新定位”，或输入地点名称查询。微信内无法定位时，可通过右上角菜单在系统浏览器打开。');$('manual').open=true;$('placeholder').textContent='取得位置后，这里会显示最近的5家参与酒馆。'}
+
+function show(){
+  if(!origin)return;
+  const selected=nearest(window.BARS,origin),mapped=window.BARS.filter(b=>b.point).length;
+  $('list').replaceChildren();
+  $('resultTitle').textContent='离你最近的 '+selected.length+' 家';
+  $('coverage').textContent='已匹配坐标 '+mapped+' / '+window.BARS.length+' 家'+(mapped<window.BARS.length?' · 未匹配门店不参与排名，当前结果可能不完整':'');
+  selected.forEach((b,i)=>{
+    const card=document.createElement('article');
+    card.className='card';
+    const h=document.createElement('h3');h.textContent=b.name;
+    const d=document.createElement('strong');d.className='distance';d.textContent=b.km<1?Math.round(b.km*1000)+' 米':b.km.toFixed(2)+' 公里';
+    const addr=document.createElement('p');addr.textContent=b.address;
+    const time=document.createElement('p');time.textContent=b.hours;
+    const link=document.createElement('a');
+    link.className='maplink';link.textContent='查看地图与路线';
+    link.href='https://uri.amap.com/marker?position='+b.point.join(',')+'&name='+encodeURIComponent(b.name)+'&coordinate=gaode&callnative=1';
+    link.rel='noopener';
+    const info=document.createElement('small');info.textContent='坐标按'+(b.matchLevel||'门店位置')+'匹配，实际路程以地图为准';
+    const actions=document.createElement('div');actions.className='actions';actions.append(link);
+    card.append(h,d,addr,time,info,actions);
+    $('list').append(card)
+  });
+  $('placeholder').hidden=true;
+  message('已按直线距离从近到远排序。'+(lastAccuracy?'定位精度约 '+Math.round(lastAccuracy)+' 米。':''));
+}
+
+function gcj(lng,lat){
+  if(lng<72.004||lng>137.8347||lat<.8293||lat>55.8271)return[lng,lat];
+  const pi=Math.PI,x=lng-105,y=lat-35;
+  let a=-100+2*x+3*y+.2*y*y+.1*x*y+.2*Math.sqrt(Math.abs(x)),b=300+x+2*y+.1*x*x+.1*x*y+.1*Math.sqrt(Math.abs(x));
+  a+=(20*Math.sin(6*x*pi)+20*Math.sin(2*x*pi))*2/3;
+  a+=(20*Math.sin(y*pi)+40*Math.sin(y/3*pi))*2/3;
+  a+=(160*Math.sin(y/12*pi)+320*Math.sin(y*pi/30))*2/3;
+  b+=(20*Math.sin(6*x*pi)+20*Math.sin(2*x*pi))*2/3;
+  b+=(20*Math.sin(x*pi)+40*Math.sin(x/3*pi))*2/3;
+  b+=(150*Math.sin(x/12*pi)+300*Math.sin(x/30*pi))*2/3;
+  const rad=lat/180*pi,m=1-.006693421622965943*Math.sin(rad)**2,sm=Math.sqrt(m);
+  return[lng+b*180/(6378245/sm*Math.cos(rad)*pi),lat+a*180/((6378245*(1-.006693421622965943))/(m*sm)*pi)]
+}
+
+function locate(){
+  const run=++positionRun;
+  if(!navigator.geolocation){failure('此浏览器不支持定位');return}
+  if(!window.isSecureContext){failure('自动定位需要 HTTPS 网页，请使用正式网页链接');return}
+  $('locate').disabled=true;
+  message('正在定位，请在系统提示中允许位置权限…');
+  navigator.geolocation.getCurrentPosition(p=>{
+    if(run!==positionRun)return;
+    $('locate').disabled=false;
+    origin=gcj(p.coords.longitude,p.coords.latitude);
+    lastAccuracy=p.coords.accuracy;
+    show();
+    if(p.coords.longitude<120.7||p.coords.longitude>122.3||p.coords.latitude<30.6||p.coords.latitude>31.95)
+      message('当前位置在上海范围外；仍显示离你最近的上海参与门店。')
+  },e=>{
+    if(run!==positionRun)return;
+    $('locate').disabled=false;
+    failure(e.code===1?'位置权限未开启':e.code===3?'定位超时':'暂时无法取得位置')
+  },{enableHighAccuracy:true,timeout:18000,maximumAge:30000})
+}
+
+function failure(s){
+  message(s+'。可点击“重新定位”，或输入地点名称查询。微信内无法定位时，可通过右上角菜单在系统浏览器打开。');
+  $('manual').open=true;
+  $('placeholder').textContent='取得位置后，这里会显示最近的5家参与酒馆。';
+}
+
 $('locate').onclick=locate;
+
 // This public browser key is embedded with the owner's explicit consent.
 const AMAP_KEY='9b394c5966601993836cec621a3569bd';
 let positionRun=0,searchRun=0,searchBusy=false,lastSearchAt=0;
 const searchCache=new Map();
-const results=document.createElement('div');results.id='placeResults';results.setAttribute('aria-live','polite');$('origin').closest('.row').after(results);
-function choosePlace(place){positionRun++;$('locate').disabled=false;origin=place.point;lastAccuracy=null;$('origin').value=place.name;results.replaceChildren();show();$('resultTitle').textContent='距「'+place.name+'」最近的5家';message('以「'+place.name+'」为出发点，已按直线距离排序。')}
-function localPlaces(q){return window.BARS.filter(b=>(b.name+' '+b.address).toLowerCase().includes(q.toLowerCase())).slice(0,5).map(b=>({name:b.name,address:b.address,point:b.point,source:'参与酒馆'}))}
-function validPoint(value){if(typeof value!=='string')return null;const p=value.split(',').map(Number);return p.length===2&&p.every(Number.isFinite)&&p[0]>=120.7&&p[0]<=122.3&&p[1]>=30.6&&p[1]<=31.95?p:null}
-function amapPlaces(rows,kind){const places=[];for(const row of rows||[]){const point=validPoint(row.location);if(!point||!row.name)continue;if(places.some(p=>p.name===row.name&&distance(p.point,point)<.08))continue;const address=[row.district||row.adname,row.address].filter(x=>typeof x==='string'&&x).join(' · ');places.push({name:row.name,address,point,source:kind})}return places.slice(0,10)}
-function showPlaces(list){results.replaceChildren();for(const p of list){const button=document.createElement('button');button.type='button';button.className='place-option';const name=document.createElement('strong');name.textContent=p.name;const address=document.createElement('span');address.textContent=(p.address||'上海')+' · '+p.source;button.append(name,address);button.onclick=()=>choosePlace(p);results.append(button)}}
-function amapRequest(path,params){return new Promise((resolve,reject)=>{const callback='amap_cb_'+Math.random().toString(36).slice(2),script=document.createElement('script');let timer;const cleanup=()=>{clearTimeout(timer);script.remove();delete window[callback]};window[callback]=data=>{cleanup();if(data.status==='1')resolve(data);else reject(Error('高德接口返回：'+(data.info||'未知错误')+'。请检查 Key 权限或调用额度。'))};script.onerror=()=>{cleanup();reject(Error('无法连接高德，请检查网络后重试。'))};timer=setTimeout(()=>{cleanup();reject(Error('高德搜索超时，请重试。'))},12000);script.src='https://restapi.amap.com'+path+'?'+new URLSearchParams({...params,key:AMAP_KEY,output:'JSON',callback});document.head.append(script)})}
-async function searchPlaces(){const q=$('origin').value.trim();if(q.length<2){message('请输入至少2个字，例如：人民广场、上海科技大学、七宝万科');$('origin').focus();return}if(searchBusy)return;const run=++searchRun;const local=localPlaces(q);showPlaces(local);if(searchCache.has(q)){showPlaces([...local,...searchCache.get(q)]);message('请选择下面的匹配地点。');return}if(Date.now()-lastSearchAt<1000){message('请稍等一秒再搜索');return}searchBusy=true;lastSearchAt=Date.now();$('go').disabled=true;message('正在使用高德搜索上海地点…');try{const params={keywords:q,city:'310000',citylimit:'true'};const tips=await amapRequest('/v3/assistant/inputtips',{...params,datatype:'poi'});let online=amapPlaces(tips.tips,'高德地点');if(!online.length){const poi=await amapRequest('/v3/place/text',{...params,offset:'10',page:'1',extensions:'base'});online=amapPlaces(poi.pois,'高德地点')}if(run!==searchRun)return;searchCache.set(q,online);const combined=[...local,...online.filter(p=>!local.some(l=>l.name===p.name&&distance(l.point,p.point)<.1))];showPlaces(combined);message(combined.length?'请选择下面的正确地点，即可显示最近5家。':'没有找到匹配地点，请试试完整名称、道路门牌号或附近地铁站。')}catch(e){if(run!==searchRun)return;message(e.message+(local.length?' 也可以选择下方已收录的酒馆。':''))}finally{searchBusy=false;$('go').disabled=false}}
-$('go').onclick=searchPlaces;$('origin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchPlaces()}});$('origin').addEventListener('input',()=>{searchRun++;results.replaceChildren()});
+
+const results=document.createElement('div');
+results.id='placeResults';
+results.setAttribute('aria-live','polite');
+$('origin').closest('.row').after(results);
+
+function choosePlace(place){
+  positionRun++;
+  $('locate').disabled=false;
+  origin=place.point;
+  lastAccuracy=null;
+  $('origin').value=place.name;
+  results.replaceChildren();
+  show();
+  $('resultTitle').textContent='距「'+place.name+'」最近的5家';
+  message('以「'+place.name+'」为出发点，已按直线距离排序。');
+}
+
+function localPlaces(q){
+  return window.BARS.filter(b=>(b.name+' '+b.address).toLowerCase().includes(q.toLowerCase()))
+    .slice(0,5)
+    .map(b=>({name:b.name,address:b.address,point:b.point,source:'参与酒馆'}))
+}
+
+function validPoint(value){
+  if(typeof value!=='string')return null;
+  const p=value.split(',').map(Number);
+  return p.length===2&&p.every(Number.isFinite)&&p[0]>=120.7&&p[0]<=122.3&&p[1]>=30.6&&p[1]<=31.95?p:null
+}
+
+function amapPlaces(rows,kind){
+  const places=[];
+  for(const row of rows||[]){
+    const point=validPoint(row.location);
+    if(!point||!row.name)continue;
+    if(places.some(p=>p.name===row.name&&distance(p.point,point)<.08))continue;
+    const address=[row.district||row.adname,row.address].filter(x=>typeof x==='string'&&x).join(' · ');
+    places.push({name:row.name,address,point,source:kind})
+  }
+  return places.slice(0,10)
+}
+
+function showPlaces(list){
+  results.replaceChildren();
+  for(const p of list){
+    const button=document.createElement('button');
+    button.type='button';button.className='place-option';
+    const name=document.createElement('strong');name.textContent=p.name;
+    const address=document.createElement('span');address.textContent=(p.address||'上海')+' · '+p.source;
+    button.append(name,address);
+    button.onclick=()=>choosePlace(p);
+    results.append(button)
+  }
+}
+
+function amapRequest(path,params){
+  return new Promise((resolve,reject)=>{
+    const callback='amap_cb_'+Math.random().toString(36).slice(2),script=document.createElement('script');
+    let timer;
+    const cleanup=()=>{clearTimeout(timer);script.remove();delete window[callback]};
+    window[callback]=data=>{cleanup();if(data.status==='1')resolve(data);else reject(Error('高德接口返回：'+(data.info||'未知错误')+'。请检查 Key 权限或调用额度。'))};
+    script.onerror=()=>{cleanup();reject(Error('无法连接高德，请检查网络后重试。'))};
+    timer=setTimeout(()=>{cleanup();reject(Error('高德搜索超时，请重试。'))},12000);
+    script.src='https://restapi.amap.com'+path+'?'+new URLSearchParams({...params,key:AMAP_KEY,output:'JSON',callback});
+    document.head.append(script)
+  })
+}
+
+async function searchPlaces(){
+  const q=$('origin').value.trim();
+  if(q.length<2){message('请输入至少2个字，例如：人民广场、上海科技大学、七宝万科');$('origin').focus();return}
+  if(searchBusy)return;
+  const run=++searchRun;
+  const local=localPlaces(q);
+  showPlaces(local);
+  if(searchCache.has(q)){showPlaces([...local,...searchCache.get(q)]);message('请选择下面的匹配地点。');return}
+  if(Date.now()-lastSearchAt<1000){message('请稍等一秒再搜索');return}
+  searchBusy=true;lastSearchAt=Date.now();$('go').disabled=true;
+  message('正在使用高德搜索上海地点…');
+  try{
+    const params={keywords:q,city:'310000',citylimit:'true'};
+    const tips=await amapRequest('/v3/assistant/inputtips',{...params,datatype:'poi'});
+    let online=amapPlaces(tips.tips,'高德地点');
+    if(!online.length){
+      const poi=await amapRequest('/v3/place/text',{...params,offset:'10',page:'1',extensions:'base'});
+      online=amapPlaces(poi.pois,'高德地点')
+    }
+    if(run!==searchRun)return;
+    searchCache.set(q,online);
+    const combined=[...local,...online.filter(p=>!local.some(l=>l.name===p.name&&distance(l.point,p.point)<.1))];
+    showPlaces(combined);
+    message(combined.length?'请选择下面的正确地点，即可显示最近5家。':'没有找到匹配地点，请试试完整名称、道路门牌号或附近地铁站。')
+  }catch(e){
+    if(run!==searchRun)return;
+    message(e.message+(local.length?' 也可以选择下方已收录的酒馆。':''))
+  }finally{
+    searchBusy=false;$('go').disabled=false
+  }
+}
+
+$('go').onclick=searchPlaces;
+$('origin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchPlaces()}});
+$('origin').addEventListener('input',()=>{searchRun++;results.replaceChildren()});
 
 locate();
-</script></body></html>
+</script>
+</body>
+</html>
