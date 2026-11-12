@@ -251,7 +251,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
     <div class="listhead">
       <h2 id="resultTitle">离你最近的几家</h2>
     </div>
-    <div class="filters"><label>类型 <select id="kind"><option value="all">全部</option><option value="cocktail">鸡尾酒／威士忌</option><option value="beer">精酿／啤酒</option><option value="home">Homebar／社交</option><option value="game">桌游／运动</option></select></label><label><input type="checkbox" id="hideToday" checked> 隐藏今日已去</label><label><input type="checkbox" id="hideHistory"> 隐藏历史去过</label></div><p id="coverage"></p>
+    <div class="filters"><label>类型 <select id="kind"><option value="all">全部</option><option value="cocktail">鸡尾酒／威士忌</option><option value="beer">精酿／啤酒</option><option value="home">Homebar／社交</option><option value="game">桌游／运动</option></select></label><label><input type="checkbox" id="hideToday" checked> 隐藏今日已去</label><label><input type="checkbox" id="hideHistory"> 隐藏历史去过</label></div><p id="syncStatus" role="status" aria-live="polite">正在连接到访记录…</p><p id="coverage"></p>
     <div id="placeholder">定位一开，最近的酒馆就冒出来了。</div>
     <div id="list" aria-live="polite"></div>
   </section>
@@ -462,9 +462,42 @@ const visitKey='sh-bar-visits-v1';
 let visits={};try{visits=JSON.parse(localStorage.getItem(visitKey)||'{}')||{}}catch{}
 const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const barId=b=>b.name+'|'+b.address;
+const SUPABASE_URL='https://mgveknbhtepximxcqmav.supabase.co';
+const SUPABASE_KEY='sb_publishable_weUvtfBL2BKzURnatUQZ1A_B0Zoz-Zb';
+const sessionKey='sh-bar-supabase-session-v1';
+let session=null;
+function syncMessage(s){$('syncStatus').textContent=s}
+async function supabaseRequest(path,options={}){
+  const response=await fetch(SUPABASE_URL+path,{...options,headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json',...(session?.access_token?{Authorization:'Bearer '+session.access_token}:{}),...options.headers}});
+  const body=await response.text();let data;try{data=body?JSON.parse(body):null}catch{data=body}
+  if(!response.ok)throw Error(data?.message||data?.msg||data?.error||'HTTP '+response.status);
+  return data
+}
+async function ensureSession(){
+  try{session=JSON.parse(localStorage.getItem(sessionKey)||'null')}catch{}
+  if(session?.expires_at && session.expires_at<Date.now()/1000+60){
+    try{const refreshed=await supabaseRequest('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:session.refresh_token})});session={...refreshed,expires_at:Math.floor(Date.now()/1000)+refreshed.expires_in};localStorage.setItem(sessionKey,JSON.stringify(session))}catch{session=null}
+  }
+  if(!session?.access_token){const created=await supabaseRequest('/auth/v1/signup',{method:'POST',body:JSON.stringify({data:{}})});session={...created,expires_at:Math.floor(Date.now()/1000)+created.expires_in};localStorage.setItem(sessionKey,JSON.stringify(session))}
+}
+async function loadVisits(){
+  try{await ensureSession();const rows=await supabaseRequest('/rest/v1/bar_visits?select=bar_id,visit_count,last_visited_on',{headers:{Accept:'application/json'}});
+    const remote={};for(const row of rows)remote[row.bar_id]={count:row.visit_count,last:row.last_visited_on};
+    for(const [id,v] of Object.entries(visits))if(!remote[id]&&v.count>0){await saveVisit(id,v);remote[id]=v}
+    visits=remote;localStorage.setItem(visitKey,JSON.stringify(visits));syncMessage('到访记录已连接，仅你当前设备的匿名身份可查看。');show()
+  }catch(e){syncMessage('云端同步暂不可用，当前仍可使用本机记录：'+e.message)}
+}
+async function saveVisit(id,value){
+  if(!session?.access_token){syncMessage('记录已保存在本机，云端暂未连接。');return}
+  try{if(value){await supabaseRequest('/rest/v1/bar_visits?on_conflict=user_id,bar_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({user_id:session.user.id,bar_id:id,visit_count:value.count,last_visited_on:value.last})})}
+    else await supabaseRequest('/rest/v1/bar_visits?bar_id=eq.'+encodeURIComponent(id),{method:'DELETE'});
+    syncMessage('到访记录已同步。')
+  }catch(e){syncMessage('已保存在本机，云端同步失败：'+e.message)}
+}
+
 function kindMatch(b,k){const n=b.name.toLowerCase();return k==='all'||({cocktail:/鸡尾酒|cocktail|威士忌|whisk/,beer:/精酿|啤酒|taproom|pub|pints|brew/,home:/homebar|home bar|社交|家庭式/,game:/桌游|飞镖|运动|game|轮滑/}[k]||/^$/).test(n)}
 function nearest(rows,p){return rows.filter(b=>Array.isArray(b.point)&&b.point.length===2&&b.point.every(Number.isFinite)).filter(b=>kindMatch(b,$('kind').value)).filter(b=>!$('hideToday').checked||visits[barId(b)]?.last!==today()).filter(b=>!$('hideHistory').checked||!visits[barId(b)]?.count).map(b=>({...b,km:distance(p,b.point)})).sort((a,b)=>a.km-b.km).slice(0,5)}
-function markVisit(b){const id=barId(b),v=visits[id]||{count:0};if(v.last===today()){v.count=Math.max(0,v.count-1);v.last=null}else{v.count++;v.last=today()}if(v.count)visits[id]=v;else delete visits[id];try{localStorage.setItem(visitKey,JSON.stringify(visits))}catch{}show()}
+async function markVisit(b){const id=barId(b),v=visits[id]||{count:0};if(v.last===today()){v.count=Math.max(0,v.count-1);v.last=null}else{v.count++;v.last=today()}if(v.count)visits[id]=v;else delete visits[id];try{localStorage.setItem(visitKey,JSON.stringify(visits))}catch{}show();await saveVisit(id,visits[id])}
 let walkRun=0;const walkCache=new Map();
 async function walkTimes(bars,from,run){await Promise.all(bars.map(async b=>{const key=from.map(x=>x.toFixed(4)).join(',')+'|'+b.point.join(',');let minutes=walkCache.get(key);if(minutes===undefined){try{const data=await amapRequest('/v3/direction/walking',{origin:from.join(','),destination:b.point.join(',')});const sec=Number(data.route?.paths?.[0]?.duration);minutes=sec>0?Math.ceil(sec/60):null;walkCache.set(key,minutes)}catch{minutes=null}}if(run===walkRun){const el=document.getElementById('walk-'+bars.indexOf(b));if(el)el.firstChild.textContent=minutes?'步行约 '+minutes+' 分钟 · 直线距离 ':'步行时间暂不可用 · 直线距离 '}}))}
 function message(s){$('status').textContent=s}
@@ -646,6 +679,7 @@ $('origin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(
 $('origin').addEventListener('input',()=>{searchRun++;results.replaceChildren()});
 
 locate();
+loadVisits();
 </script>
 </body>
 </html>
