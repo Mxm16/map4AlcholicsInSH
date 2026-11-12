@@ -121,6 +121,7 @@ a{color:var(--neon)}
 small{font-weight:400;color:var(--ink-soft);font-size:11px}
 #coverage{font-size:12px;color:var(--ink-soft);margin:0 0 14px}
 
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}.filters label{font-size:12px;color:var(--ink-soft)}.filters select{padding:7px}.visit-actions{display:flex;gap:6px;padding-left:12px;flex-wrap:wrap}.visit-actions button{padding:6px 9px;font-size:11px}.visit-actions .active{background:var(--neon);color:#1a0f06}
 #list{display:grid;grid-template-columns:1fr;gap:10px}
 
 .card{
@@ -250,7 +251,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
     <div class="listhead">
       <h2 id="resultTitle">离你最近的几家</h2>
     </div>
-    <p id="coverage"></p>
+    <div class="filters"><label>类型 <select id="kind"><option value="all">全部</option><option value="cocktail">鸡尾酒／威士忌</option><option value="beer">精酿／啤酒</option><option value="home">Homebar／社交</option><option value="game">桌游／运动</option></select></label><label><input type="checkbox" id="hideToday" checked> 隐藏今日已去</label><label><input type="checkbox" id="hideHistory"> 隐藏历史去过</label></div><p id="coverage"></p>
     <div id="placeholder">定位一开，最近的酒馆就冒出来了。</div>
     <div id="list" aria-live="polite"></div>
   </section>
@@ -457,7 +458,15 @@ const $=id=>document.getElementById(id);
 let origin=null,lastAccuracy=null;
 
 function distance(a,b){const r=Math.PI/180,x=(b[1]-a[1])*r,y=(b[0]-a[0])*r;return 6371*2*Math.asin(Math.min(1,Math.sqrt(Math.sin(x/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin(y/2)**2)))}
-function nearest(rows,p){return rows.filter(b=>Array.isArray(b.point)&&b.point.length===2&&b.point.every(Number.isFinite)).map(b=>({...b,km:distance(p,b.point)})).sort((a,b)=>a.km-b.km).slice(0,5)}
+const visitKey='sh-bar-visits-v1';
+let visits={};try{visits=JSON.parse(localStorage.getItem(visitKey)||'{}')||{}}catch{}
+const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+const barId=b=>b.name+'|'+b.address;
+function kindMatch(b,k){const n=b.name.toLowerCase();return k==='all'||({cocktail:/鸡尾酒|cocktail|威士忌|whisk/,beer:/精酿|啤酒|taproom|pub|pints|brew/,home:/homebar|home bar|社交|家庭式/,game:/桌游|飞镖|运动|game|轮滑/}[k]||/^$/).test(n)}
+function nearest(rows,p){return rows.filter(b=>Array.isArray(b.point)&&b.point.length===2&&b.point.every(Number.isFinite)).filter(b=>kindMatch(b,$('kind').value)).filter(b=>!$('hideToday').checked||visits[barId(b)]?.last!==today()).filter(b=>!$('hideHistory').checked||!visits[barId(b)]?.count).map(b=>({...b,km:distance(p,b.point)})).sort((a,b)=>a.km-b.km).slice(0,5)}
+function markVisit(b){const id=barId(b),v=visits[id]||{count:0};if(v.last===today()){v.count=Math.max(0,v.count-1);v.last=null}else{v.count++;v.last=today()}if(v.count)visits[id]=v;else delete visits[id];try{localStorage.setItem(visitKey,JSON.stringify(visits))}catch{}show()}
+let walkRun=0;const walkCache=new Map();
+async function walkTimes(bars,from,run){await Promise.all(bars.map(async b=>{const key=from.map(x=>x.toFixed(4)).join(',')+'|'+b.point.join(',');let minutes=walkCache.get(key);if(minutes===undefined){try{const data=await amapRequest('/v3/direction/walking',{origin:from.join(','),destination:b.point.join(',')});const sec=Number(data.route?.paths?.[0]?.duration);minutes=sec>0?Math.ceil(sec/60):null;walkCache.set(key,minutes)}catch{minutes=null}}if(run===walkRun){const el=document.getElementById('walk-'+bars.indexOf(b));if(el)el.firstChild.textContent=minutes?'步行约 '+minutes+' 分钟 · 直线距离 ':'步行时间暂不可用 · 直线距离 '}}))}
 function message(s){$('status').textContent=s}
 
 function show(){
@@ -466,11 +475,11 @@ function show(){
   $('list').replaceChildren();
   $('resultTitle').textContent='离你最近的 '+selected.length+' 家';
   $('coverage').textContent='已匹配坐标 '+mapped+' / '+window.BARS.length+' 家'+(mapped<window.BARS.length?' · 未匹配门店不参与排名，当前结果可能不完整':'');
-  selected.forEach((b,i)=>{
+  const run=++walkRun; selected.forEach((b,i)=>{
     const card=document.createElement('article');
     card.className='card';
     const h=document.createElement('h3');h.textContent=b.name;
-    const d=document.createElement('strong');d.className='distance';d.textContent=b.km<1?Math.round(b.km*1000)+' 米':b.km.toFixed(2)+' 公里';
+    const d=document.createElement('strong');d.className='distance';d.id='walk-'+i;d.textContent='步行时间查询中 · 直线距离 ';const dist=document.createElement('span');dist.textContent=b.km<1?Math.round(b.km*1000)+' 米':b.km.toFixed(2)+' 公里';d.append(dist);
     const addr=document.createElement('p');addr.textContent=b.address;
     const time=document.createElement('p');time.textContent=b.hours;
     const link=document.createElement('a');
@@ -479,11 +488,11 @@ function show(){
     link.rel='noopener';
     const info=document.createElement('small');info.textContent='坐标按'+(b.matchLevel||'门店位置')+'匹配，实际路程以地图为准';
     const actions=document.createElement('div');actions.className='actions';actions.append(link);
-    card.append(h,d,addr,time,info,actions);
+    const visit=document.createElement('div');visit.className='visit-actions';const v=document.createElement('button');v.type='button';v.className='secondary'+(visits[barId(b)]?.last===today()?' active':'');v.textContent=visits[barId(b)]?.last===today()?'撤销今日已去':'标记今日已去';v.onclick=()=>markVisit(b);visit.append(v);if(visits[barId(b)]?.count){const note=document.createElement('small');note.textContent='历史去过 '+visits[barId(b)].count+' 次';visit.append(note)}card.append(h,d,addr,time,info,actions,visit);
     $('list').append(card)
   });
   $('placeholder').hidden=true;
-  message('找到你了，按直线距离从近到远排好了。'+(lastAccuracy?' 定位精度约 '+Math.round(lastAccuracy)+' 米。':''));
+  walkTimes(selected,origin,run);message('找到你了，按直线距离从近到远排好了。'+(lastAccuracy?' 定位精度约 '+Math.round(lastAccuracy)+' 米。':''));
 }
 
 function gcj(lng,lat){
@@ -632,7 +641,7 @@ async function searchPlaces(){
   }
 }
 
-$('go').onclick=searchPlaces;
+$('go').onclick=searchPlaces;for(const id of ['kind','hideToday','hideHistory'])$(id).addEventListener('change',show);
 $('origin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchPlaces()}});
 $('origin').addEventListener('input',()=>{searchRun++;results.replaceChildren()});
 
