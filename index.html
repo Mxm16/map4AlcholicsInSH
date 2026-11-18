@@ -486,6 +486,290 @@ function message(s){$('status').textContent=s}
 
 // Keyed by barId(bar). Populate only from a verified branch and event edition.
 const verifiedBarDetails = {};
+const amapRatings = {
+  "Project W 威士忌·鸡尾酒|襄阳北路17号-1（襄乐大厦1楼-1、襄阳北路与巨鹿路交叉口南行200米路东）": {
+    "rating": "4.7",
+    "name": "PROJECT W(襄乐大厦店)",
+    "address": "襄阳北路17号",
+    "id": "B0H6PSOPP2"
+  },
+  "上海力波·精酿鲜啤馆(耀华滨江公寓店)|上钢新村街道济明路431号耀华逸坊1层B室": {
+    "rating": "4.2",
+    "name": "上海力波·精酿鲜啤馆(后滩店)",
+    "address": "上钢新村街道济明路431号耀华逸坊1层B室",
+    "id": "B0MGGU3U0T"
+  },
+  "Double S|绍兴路100号": {
+    "rating": "4.5",
+    "name": "Double S",
+    "address": "绍兴路100号",
+    "id": "B0K1LZAQW7"
+  },
+  "THE HOLE IN THE WALL|昌平路653号(昌平路地铁站4号口步行270米)": {
+    "rating": "4.3",
+    "name": "The Hole In The Wall(东安公寓店)",
+    "address": "昌平路653号(昌平路地铁站4号口步行260米)",
+    "id": "B0IUXLHNC1"
+  },
+  "这没HomeBar&Dance(人广首店)|六合路98号港陆黄浦中心5A": {
+    "rating": "4.6",
+    "name": "这没HomeBar&Dance",
+    "address": "南京东路街道六合路98号港陆黄浦中心5A室",
+    "id": "B0LAJ9VQ3Z"
+  },
+  "DaGa嗒嘎·homebar(长宁龙之梦店)|华阳路街道长宁路1018号17楼1706室": {
+    "rating": "4.3",
+    "name": "DaGa嗒嘎·homebar(长宁龙之梦店)",
+    "address": "华阳路街道长宁路1018号17楼1706室",
+    "id": "B0MB4KXRE8"
+  },
+  "PRE DRINK不误正夜(成都南路店)|成都南路122号": {
+    "rating": "4.4",
+    "name": "PRE-DRINK 不误正夜(成都南路店)",
+    "address": "成都南路122号",
+    "id": "B0KKYC8I6G"
+  },
+  "LastDrop 福根儿|陕西北路549号-7室": {
+    "rating": "4.5",
+    "name": "LastDrop福根儿",
+    "address": "陕西北路549号-7室",
+    "id": "B0MDSMDSHO"
+  },
+  "PRE DRINK不误正夜(陕西南路店)|陕西南路90号": {
+    "rating": "4.6",
+    "name": "PRE-DRINK不误正夜(陕西南路店)",
+    "address": "陕西南路90号(进贤小区西门旁)",
+    "id": "B0JASZ416X"
+  },
+  "SIDE BAR 飞镖主题运动吧|茂名南路56号食尚谷SIDE BAR飞镖运动酒吧": {
+    "rating": "4.5",
+    "name": "SIDE BAR",
+    "address": "茂名南路56号(淮海中路地铁站3号口步行420米)",
+    "id": "B00156FSKX"
+  },
+  "8PINTS八品脱·小花园餐酒吧(漕宝路店)|漕宝路36号2号楼C单元103室": {
+    "rating": "4.6",
+    "name": "8PINTS八品脱·小花园餐酒吧(漕宝路店)",
+    "address": "漕宝路36号2号楼C单元103室",
+    "id": "B0J2PH7RNV"
+  },
+  "云山之藤(久光店)|南京西路1618号久光百货5楼": {
+    "rating": "4.3",
+    "name": "云山之藤(久光店)",
+    "address": "南京西路1618号久光百货5楼(静安寺地铁站出入口旁)",
+    "id": "B0KUMHM7U6"
+  },
+  "幸福里homebar•年轻社交空间|定西路1016号银统大厦北楼1012号": {
+    "rating": "4.6",
+    "name": "幸福里homebar.年轻社交空间",
+    "address": "定西路1016号银统大厦北楼1201室",
+    "id": "B0LARLB9BV"
+  },
+  "隐·九 BAR&COFFEE&TEA|淡水路250号(一大会址·新天地地铁站5号口步行220米)": {
+    "rating": "4.5",
+    "name": "隐·九BAR&COFFEE&TEA",
+    "address": "淡水路250号(一大会址·新天地地铁站5号口步行220米)",
+    "id": "B0K1JMEKWL"
+  },
+  "W BAR·Shisha民谣鸡尾酒吧(长寿路店)|莫干山路50号3-107WArt&Bistro艺术酒馆": {
+    "rating": "4.4",
+    "name": "W BAR艺术民谣鸡尾酒吧(M50店)",
+    "address": "莫干山路50号创意园内3-107 We Bar",
+    "id": "B0LGLHNGW0"
+  },
+  "聚野Taproom|威海路870号": {
+    "rating": "4.5",
+    "name": "聚野Taproom",
+    "address": "威海路870号(威海路888弄小区正门旁)",
+    "id": "B0KRTSSE08"
+  },
+  "魔女喝喝精酿酒屋(静安店)|武定路535号": {
+    "rating": "4.6",
+    "name": "魔女喝喝精酿酒屋(静安店)",
+    "address": "武定路535号(武定坊东南门旁)",
+    "id": "B0FFISKD7S"
+  },
+  "DASH LAND 大师兰德鸡尾酒吧(襄阳北路店)|襄阳北路1号": {
+    "rating": "4.7",
+    "name": "DASH LAND(襄阳北路店)",
+    "address": "襄阳北路1号",
+    "id": "B0K1L5JBCP"
+  },
+  "724 Music Bar(灵石路店)|灵石路699号2号楼104室": {
+    "rating": "4.6",
+    "name": "724 music bar(灵石路店)",
+    "address": "灵石路699号2号楼104室",
+    "id": "B0K2FMFWE1"
+  },
+  "魔女喝喝酒集(徐汇店)|石龙路659号": {
+    "rating": "4.4",
+    "name": "魔女喝喝酒集(徐汇)",
+    "address": "石龙路659号(上海南站地铁站2号口步行440米)",
+    "id": "B0KRYZ0W12"
+  },
+  "夜航Homebar·拼豆手作·微醺酒馆|延安西路777号裕丰国际大厦701室": {
+    "rating": "4.4",
+    "name": "夜航homebar·拼豆手作·家庭酒馆",
+    "address": "延安西路777号裕丰国际大厦701室",
+    "id": "B0LGC4JGXK"
+  },
+  "半醒bar家庭式酒馆home bar|长寿路1118号悦达国际大厦A座15B": {
+    "rating": "4.5",
+    "name": "半醒bar家庭式酒馆",
+    "address": "长寿路1118号悦达国际大厦A座L1层",
+    "id": "B0LGBO5XFF"
+  },
+  "Cantona&bar(万航渡路店)|万航渡路457号": {
+    "rating": "4.3",
+    "name": "Cantona Bar(万航渡路店)",
+    "address": "万航渡路457号(武定路地铁站2号口步行310米)",
+    "id": "B0FFHKGM2X"
+  },
+  "筝歌啤酒屋(巨鹿路店)|巨鹿路360-8号": {
+    "rating": "4.6",
+    "name": "筝歌啤酒屋(巨鹿路)",
+    "address": "巨鹿路360号",
+    "id": "B0J0FCSQFG"
+  },
+  "筝歌啤酒屋(静安店)|康定路856号": {
+    "rating": "4.6",
+    "name": "筝歌啤酒屋(静安店)",
+    "address": "曹家渡街道康定路856号(昌平路地铁站3号口步行420米)",
+    "id": "B0K21AXA27"
+  },
+  "8PINTS八品脱·精酿碳烤餐吧·后门Home bar·17点出餐(胶州路店)|胶州路633号一层（地铁7号线5号口出来直走过马路就是）": {
+    "rating": "4.5",
+    "name": "8PINTS八品脱·精酿碳烤餐吧(胶州路店)",
+    "address": "胶州路633号一层(昌平路地铁站5号口步行140米)",
+    "id": "B0LAZLY07U"
+  },
+  "Cloud·SU LOUNGE the bund|中山东二路600号复星艺术中心4楼": {
+    "rating": "4.6",
+    "name": "Cloud·SU LOUNGE the bund",
+    "address": "中山东二路600号复星艺术中心4层",
+    "id": "B0LBZ1OUJN"
+  },
+  "小公馆 Lafayette1315Bar|复兴中路1315号": {
+    "rating": "4.5",
+    "name": "小公馆Lafayette1315Bar",
+    "address": "复兴中路1315号-1",
+    "id": "B0HK05CWZ5"
+  },
+  "Pigs Home家庭式酒吧(定西路店)|定西路1016号2101A": {
+    "rating": "4.5",
+    "name": "Pigs home家庭式社交酒吧",
+    "address": "定西路1016弄银统大厦21楼2101A",
+    "id": "B0LBNMAYUV"
+  },
+  "Alive活着|同心路723号德必7街区A座一楼M9（巷子走到底）": {
+    "rating": "4.4",
+    "name": "Alive Bar",
+    "address": "同心路723号德必7街区A座一楼M9(巷子走到底)",
+    "id": "B0LDA76L1Z"
+  },
+  "离线Homebar·家庭酒馆|大学路307号502室": {
+    "rating": "4.5",
+    "name": "离线homebar家庭小酒馆",
+    "address": "大学路307弄502室",
+    "id": "B0K1CZ6UWJ"
+  },
+  "ANOTHER9(永昌大厦店)|余姚路27号": {
+    "rating": "4.5",
+    "name": "Another9(永昌大厦店)",
+    "address": "余姚路27号",
+    "id": "B0FFIS1K3L"
+  },
+  "小亲新清酒社|永康路120号2楼空间": {
+    "rating": "4.5",
+    "name": "小亲新清酒社",
+    "address": "永康路120号2层",
+    "id": "B0LGNOUBL1"
+  },
+  "卓X·研酒工坊|中山北路2790号杰地大厦五楼503-504室": {
+    "rating": "4.2",
+    "name": "卓X·研酒工坊",
+    "address": "长寿路街道中山北路2790号杰地大厦503-504室",
+    "id": "B0MGRRLB9L"
+  },
+  "MENTAN 漫啖|南昌路264号": {
+    "rating": "4.4",
+    "name": "MENTAN 漫啖",
+    "address": "南昌路264号",
+    "id": "B0LA1LED07"
+  },
+  "赛乐酒窖Cellar Door Wines(嘉善路店)|嘉善路508号尚街园区103A": {
+    "rating": "4.4",
+    "name": "赛乐酒窖Cellar Door Wines(嘉善路店)",
+    "address": "嘉善路508号1-103A(嘉善路地铁站5号口步行340米)",
+    "id": "B0FFFA1UKW"
+  },
+  "Latitude叁壹|茂名南路18号A": {
+    "rating": "4.5",
+    "name": "Latitude叁壹",
+    "address": "茂名南路18号A",
+    "id": "B0L34SFO7G"
+  },
+  "SU LOUNGE 24Bespoke(中港汇铂尔曼店)|打浦桥街道打浦路15号上海中港汇铂尔曼大酒店24楼": {
+    "rating": "4.5",
+    "name": "SU LOUNGE 24 bespoke(中港汇铂尔曼店)",
+    "address": "打浦桥街道打浦路15号上海中港汇铂尔曼大酒店24楼",
+    "id": "B0L2YUVFMB"
+  },
+  "坠入Bistro·贵州创意菜(南京西路店)|凤阳路659号-1室": {
+    "rating": "4.7",
+    "name": "坠入Bistro·贵州创意菜(南京西路店)",
+    "address": "凤阳路659号-1室(南京西路地铁站5号口步行300米)",
+    "id": "B0H0FSMKXX"
+  },
+  "MOOD·homebar|人民路885号淮海中华大厦2010室": {
+    "rating": "4.4",
+    "name": "Mood·Homebar",
+    "address": "人民路885-905号淮海中华大厦2010室",
+    "id": "B0L13U6J4V"
+  },
+  "VANFO·晚疯|打浦桥街道瑞金二路272号1号楼202室": {
+    "rating": "4.5",
+    "name": "VANFO·晚疯(装修中)",
+    "address": "打浦桥街道瑞金二路272号1号楼202室",
+    "id": "B0JRTMZIPE"
+  },
+  "芸颂酒窖Winsome Cellar(静安寺店)|南京西路街道北京西路1381号": {
+    "rating": "4.7",
+    "name": "芸颂酒窖WinsomeCellar(静安寺店)",
+    "address": "北京西路1381号",
+    "id": "B0LKHCQFP0"
+  },
+  "Lounge微醺Cocktail·Whisky·Bar|蒙自路207号12号楼(马当路地铁站3号口步行400米)": {
+    "rating": "4.6",
+    "name": "Lounge微醺",
+    "address": "打浦桥街道蒙自路207号宏慧盟智园12号楼1层001B室",
+    "id": "B0HULA2ZV8"
+  },
+  "Yoo78 Coffee&Bar|斜土路1111弄1-20号福华花苑": {
+    "rating": "4.6",
+    "name": "Yoo78 Coffee",
+    "address": "斜土路1111弄1-20号福华花苑",
+    "id": "B0L3AST6MH"
+  },
+  "YQ·mmm|南京西路街道威海路857号": {
+    "rating": "4.1",
+    "name": "YQ.mmm",
+    "address": "南京西路街道威海路857号",
+    "id": "B0MRCZQDP0"
+  },
+  "COPLUSDE 咖啡豆仓(襄阳南路店）|襄阳南路288号-2号": {
+    "rating": "4.6",
+    "name": "COPLUSDE咖啡豆仓(襄阳南路店)",
+    "address": "襄阳南路288号-2号",
+    "id": "B0HKVH6SHC"
+  },
+  "Kisslab|威海路856(南京西路地铁站12号口步行410米)": {
+    "rating": "4.6",
+    "name": "KISS LAB",
+    "address": "威海路856(南京西路地铁站12号口步行410米)",
+    "id": "B0K239QNCY"
+  }
+};
 function appendBarDetails(card, bar){
   const details = verifiedBarDetails[barId(bar)];
   const rating = document.createElement('p');
@@ -499,11 +783,19 @@ function appendBarDetails(card, bar){
   link.textContent=details?.dianpingUrl?'打开分店':'去大众点评查评分';
   link.target='_blank';
   link.rel='noopener noreferrer';
-  rating.append(' · ',link);
+  if(details?.dianpingRating == null) rating.replaceChildren(link);
+  else rating.append(' · ',link);
   const drinks=document.createElement('p');
   drinks.textContent='本期可兑酒款：'+(details?.eventDrinks?.length
     ? details.eventDrinks.map(drink=>drink.type?drink.name+'（'+drink.type+'）':drink.name).join('、')
     : '待核实');
+  const amap = amapRatings[barId(bar)];
+  if(amap){
+    const score = document.createElement('p');
+    score.textContent = '高德评分 '+amap.rating+'/5 · 2026-11-18 查询';
+    score.title = amap.name+' · '+amap.address;
+    card.append(score);
+  }
   card.append(rating,drinks);
 }
 function show(){
