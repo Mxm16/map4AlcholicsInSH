@@ -484,6 +484,28 @@ let walkRun=0;const walkCache=new Map();
 async function walkTimes(bars,from,run){await Promise.all(bars.map(async b=>{const key=from.map(x=>x.toFixed(4)).join(',')+'|'+b.point.join(',');let minutes=walkCache.get(key);if(minutes===undefined){try{const data=await amapRequest('/v3/direction/walking',{origin:from.join(','),destination:b.point.join(',')});const sec=Number(data.route?.paths?.[0]?.duration);minutes=sec>0?Math.ceil(sec/60):null;walkCache.set(key,minutes)}catch{minutes=null}}if(run===walkRun){const el=document.getElementById('walk-'+bars.indexOf(b));if(el)el.firstChild.textContent=minutes?'步行约 '+minutes+' 分钟 · 直线距离 ':'步行时间暂不可用 · 直线距离 '}}))}
 function message(s){$('status').textContent=s}
 
+// Keyed by barId(bar). Populate only from a verified branch and event edition.
+const verifiedBarDetails = {};
+function appendBarDetails(card, bar){
+  const details = verifiedBarDetails[barId(bar)];
+  const rating = document.createElement('p');
+  rating.textContent = details?.dianpingRating == null
+    ? '大众点评评分：待核实'
+    : '大众点评评分：'+details.dianpingRating+'/5'+(details.dianpingCheckedAt?' · '+details.dianpingCheckedAt:'');
+  const link=document.createElement('a');
+  const shopName=bar.name+' '+bar.address;
+  link.href=details?.dianpingUrl
+    || 'https://www.dianping.com/search/keyword/1/0_'+encodeURIComponent(shopName);
+  link.textContent=details?.dianpingUrl?'打开分店':'去大众点评查评分';
+  link.target='_blank';
+  link.rel='noopener noreferrer';
+  rating.append(' · ',link);
+  const drinks=document.createElement('p');
+  drinks.textContent='本期可兑酒款：'+(details?.eventDrinks?.length
+    ? details.eventDrinks.map(drink=>drink.type?drink.name+'（'+drink.type+'）':drink.name).join('、')
+    : '待核实');
+  card.append(rating,drinks);
+}
 function show(){
   if(!origin)return;
   const selected=nearest(window.BARS,origin),mapped=window.BARS.filter(b=>b.point).length;
@@ -503,7 +525,7 @@ function show(){
     link.rel='noopener';
     const info=document.createElement('small');info.textContent='坐标按'+(b.matchLevel||'门店位置')+'匹配，实际路程以地图为准';
     const actions=document.createElement('div');actions.className='actions';actions.append(link);const reviewButton=document.createElement('button');reviewButton.type='button';reviewButton.className='secondary';reviewButton.textContent=reviews[barId(b)]?'编辑评价':'评价';reviewButton.onclick=()=>openReview(b);actions.append(reviewButton);if(reviews[barId(b)]){const badge=document.createElement('span');badge.className='review-badge';badge.textContent='已评价';card.append(badge)}
-    const visit=document.createElement('div');visit.className='visit-actions';const v=document.createElement('button');v.type='button';v.className='secondary'+(events.some(e=>e.bar_id===barId(b)&&e.visit_day===today())?' active':'');v.textContent=events.some(e=>e.bar_id===barId(b)&&e.visit_day===today())?'撤销今日已去':'标记今日已去';v.onclick=()=>markVisit(b);visit.append(v);if(visits[barId(b)]?.count){const note=document.createElement('small');note.textContent='历史去过 '+visits[barId(b)].count+' 次';visit.append(note)}card.append(h,d,addr,time,info,actions,visit);
+    const visit=document.createElement('div');visit.className='visit-actions';const v=document.createElement('button');v.type='button';v.className='secondary'+(events.some(e=>e.bar_id===barId(b)&&e.visit_day===today())?' active':'');v.textContent=events.some(e=>e.bar_id===barId(b)&&e.visit_day===today())?'撤销今日已去':'标记今日已去';v.onclick=()=>markVisit(b);visit.append(v);if(visits[barId(b)]?.count){const note=document.createElement('small');note.textContent='历史去过 '+visits[barId(b)].count+' 次';visit.append(note)}card.append(h);appendBarDetails(card,b);card.append(d,addr,time,info,actions,visit);
     $('list').append(card)
   });
   $('placeholder').hidden=true;
