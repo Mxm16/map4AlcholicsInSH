@@ -516,7 +516,43 @@ function openReview(b){activeReviewId=barId(b);const r=reviews[activeReviewId];$
 $('cancelReview').onclick=()=>$('reviewDialog').close();$('reviewForm').onsubmit=async e=>{e.preventDefault();if(!session){alert('请稍等，正在连接云端。');return}const rating=$('reviewRating').value,note=$('reviewText').value.trim();if(!rating&&!note){alert('请填写评分或短评。');return}try{await supabaseRequest('/rest/v1/bar_reviews?on_conflict=user_id,bar_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({user_id:session.user.id,bar_id:activeReviewId,rating:rating?+rating:null,note})});reviews[activeReviewId]={rating:rating?+rating:null,note};$('reviewDialog').close();show()}catch(err){alert('保存失败：'+err.message)}};
 $('deleteReview').onclick=async()=>{try{await supabaseRequest('/rest/v1/bar_reviews?bar_id=eq.'+encodeURIComponent(activeReviewId),{method:'DELETE'});delete reviews[activeReviewId];$('reviewDialog').close();show()}catch(err){alert('删除失败：'+err.message)}};
 let walkRun=0;const walkCache=new Map();
-async function walkTimes(bars,from,run){await Promise.all(bars.map(async b=>{const key=from.map(x=>x.toFixed(4)).join(',')+'|'+b.point.join(',');let minutes=walkCache.get(key);if(minutes===undefined){try{const data=await amapRequest('/v3/direction/walking',{origin:from.join(','),destination:b.point.join(',')});const sec=Number(data.route?.paths?.[0]?.duration);minutes=sec>0?Math.ceil(sec/60):null;walkCache.set(key,minutes)}catch{minutes=null}}if(run===walkRun){const el=document.getElementById('walk-'+bars.indexOf(b));if(el)el.firstChild.textContent=minutes?'步行约 '+minutes+' 分钟 · 直线距离 ':'步行时间暂不可用 · 直线距离 '}}))}
+async function walkTimes(bars, from, run) {
+  const start = [...from];
+  // Sequential requests also avoid exceeding the shared key's QPS limit.
+  for (let index = 0; index < bars.length; index++) {
+    if (run !== walkRun) return;
+    const bar = bars[index];
+    const key = start.join(',') + '|' + bar.point.join(',');
+    const cached = walkCache.get(key);
+    let estimate = cached && Date.now() - cached.checkedAt < 300000 ? cached : null;
+    if (!estimate) {
+      try {
+        const data = await amapRequest('/v3/direction/walking', {
+          origin: start.join(','),
+          destination: bar.point.join(',')
+        });
+        const path = data.route?.paths?.[0];
+        const seconds = Number(path?.duration);
+        const metres = Number(path?.distance);
+        if (Number.isFinite(seconds) && seconds > 0) {
+          estimate = {minutes: Math.ceil(seconds / 60), metres, checkedAt: Date.now()};
+          walkCache.set(key, estimate);
+        }
+      } catch {
+        // Failed requests remain retryable on the next refresh.
+      }
+      if (index < bars.length - 1) await new Promise(resolve => setTimeout(resolve, 400));
+    }
+    if (run !== walkRun) return;
+    const element = document.getElementById('walk-' + index);
+    if (!element) continue;
+    element.firstChild.textContent = estimate
+      ? '步行预估 ' + estimate.minutes + ' 分钟' + (estimate.metres > 0 ? '（' + (estimate.metres / 1000).toFixed(2) + '公里）' : '') + ' · 直线距离 '
+      : '步行时间暂不可用 · 直线距离 ';
+    element.title = '按本页出发点和门店坐标计算。楼栋入口、定位精度及高德客户端重新规划可能影响结果。';
+  }
+}
+
 function message(s){$('status').textContent=s}
 
 // Keyed by barId(bar). Populate only from a verified branch and event edition.
@@ -844,12 +880,19 @@ function show(){
     const card=document.createElement('article');
     card.className='card';
     const h=document.createElement('h3');h.textContent=b.name;
-    const d=document.createElement('strong');d.className='distance';d.id='walk-'+i;d.textContent='步行时间查询中 · 直线距离 ';const dist=document.createElement('span');dist.textContent=b.km<1?Math.round(b.km*1000)+' 米':b.km.toFixed(2)+' 公里';d.append(dist);
+    const d=document.createElement('strong');d.className='distance';d.id='walk-'+i;d.textContent='步行路线查询中 · 直线距离 ';const dist=document.createElement('span');dist.textContent=b.km<1?Math.round(b.km*1000)+' 米':b.km.toFixed(2)+' 公里';d.append(dist);
     const addr=document.createElement('p');addr.textContent=b.address;
     const time=document.createElement('p');time.textContent='营业时间 '+checkedHours[barId(b)].hours+' · 高德核对 2026-11-19';
     const link=document.createElement('a');
-    link.className='maplink';link.textContent='带我去 →';
-    link.href='https://uri.amap.com/marker?position='+b.point.join(',')+'&name='+encodeURIComponent(b.name)+'&coordinate=gaode&callnative=1';
+    link.className='maplink';link.textContent='按此起终点步行 →';
+    const navigation = new URLSearchParams({
+      from: origin.join(',') + ',本页出发点',
+      to: b.point.join(',') + ',' + b.name,
+      mode: 'walk',
+      coordinate: 'gaode',
+      callnative: '1'
+    });
+    link.href = 'https://uri.amap.com/navigation?' + navigation.toString();
     link.rel='noopener';
     const info=document.createElement('small');info.textContent='坐标按'+(b.matchLevel||'门店位置')+'匹配，实际路程以地图为准';
     const actions=document.createElement('div');actions.className='actions';actions.append(link);const reviewButton=document.createElement('button');reviewButton.type='button';reviewButton.className='secondary';reviewButton.textContent=reviews[barId(b)]?'编辑评价':'评价';reviewButton.onclick=()=>openReview(b);actions.append(reviewButton);if(reviews[barId(b)]){const badge=document.createElement('span');badge.className='review-badge';badge.textContent='已评价';card.append(badge)}
