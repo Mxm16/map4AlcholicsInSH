@@ -469,7 +469,42 @@ async function loadVisits(){try{await ensureSession();const [ev,rv,pf]=await Pro
 async function refreshEvents(){events=await supabaseRequest('/rest/v1/visit_events?select=id,bar_id,visit_day,visit_count,created_at&order=created_at.desc');rebuildVisits();show();renderProfile()}
 async function markVisit(b){if(!cloudReady){syncMessage('云端暂不可用，请稍后再试，避免记录丢失。');return}const id=barId(b),existing=events.find(e=>e.bar_id===id&&e.visit_day===today());try{if(existing)await supabaseRequest('/rest/v1/visit_events?id=eq.'+existing.id,{method:'DELETE'});else await supabaseRequest('/rest/v1/visit_events',{method:'POST',body:JSON.stringify({user_id:session.user.id,bar_id:id,visit_day:today(),visit_count:1})});await refreshEvents();syncMessage(existing?'已撤销今日打卡。':'今日打卡已保存。')}catch(e){syncMessage('保存失败：'+e.message)}}
 function kindMatch(b,k){const n=b.name.toLowerCase();return k==='all'||({cocktail:/鸡尾酒|cocktail|威士忌|whisk/,beer:/精酿|啤酒|taproom|pub|pints|brew/,home:/homebar|home bar|社交|家庭式/,game:/桌游|飞镖|运动|game|轮滑/}[k]||/^$/).test(n)}
-function nearest(rows,p){return rows.filter(b=>Array.isArray(b.point)&&b.point.length===2&&b.point.every(Number.isFinite)).filter(b=>kindMatch(b,$('kind').value)).filter(b=>!$('hideToday').checked||!events.some(e=>e.bar_id===barId(b)&&e.visit_day===today())).filter(b=>!$('hideHistory').checked||!visits[barId(b)]?.count).map(b=>({...b,km:distance(p,b.point)})).sort((a,b)=>a.km-b.km).slice(0,5)}
+const checkedHours = {"Project W 威士忌·鸡尾酒|襄阳北路17号-1（襄乐大厦1楼-1、襄阳北路与巨鹿路交叉口南行200米路东）": {"hours": "19:00-02:00", "name": "PROJECT W(襄乐大厦店)", "address": "襄阳北路17号", "id": "B0H6PSOPP2"}, "上海力波·精酿鲜啤馆(耀华滨江公寓店)|上钢新村街道济明路431号耀华逸坊1层B室": {"hours": "17:00-01:00", "name": "上海力波·精酿鲜啤馆(后滩店)", "address": "上钢新村街道济明路431号耀华逸坊1层B室", "id": "B0MGGU3U0T"}, "Double S|绍兴路100号": {"hours": "08:00-01:30", "name": "Double S", "address": "绍兴路100号", "id": "B0K1LZAQW7"}, "THE HOLE IN THE WALL|昌平路653号(昌平路地铁站4号口步行270米)": {"hours": "19:00-02:00", "name": "The Hole In The Wall(东安公寓店)", "address": "昌平路653号(昌平路地铁站4号口步行260米)", "id": "B0IUXLHNC1"}, "这没HomeBar&Dance(人广首店)|六合路98号港陆黄浦中心5A": {"hours": "20:00-04:00 20:00-04:00", "name": "这没HomeBar&Dance", "address": "南京东路街道六合路98号港陆黄浦中心5A室", "id": "B0LAJ9VQ3Z"}, "DaGa嗒嘎·homebar(长宁龙之梦店)|华阳路街道长宁路1018号17楼1706室": {"hours": "20:00-03:00", "name": "DaGa嗒嘎·homebar(长宁龙之梦店)", "address": "华阳路街道长宁路1018号17楼1706室", "id": "B0MB4KXRE8"}, "PRE DRINK不误正夜(成都南路店)|成都南路122号": {"hours": "18:00-02:00", "name": "PRE-DRINK 不误正夜(成都南路店)", "address": "成都南路122号", "id": "B0KKYC8I6G"}, "LastDrop 福根儿|陕西北路549号-7室": {"hours": "18:00-24:00", "name": "LastDrop福根儿", "address": "陕西北路549号-7室", "id": "B0MDSMDSHO"}, "PRE DRINK不误正夜(陕西南路店)|陕西南路90号": {"hours": "17:30-02:00", "name": "PRE-DRINK不误正夜(陕西南路店)", "address": "陕西南路90号(进贤小区西门旁)", "id": "B0JASZ416X"}, "SIDE BAR 飞镖主题运动吧|茂名南路56号食尚谷SIDE BAR飞镖运动酒吧": {"hours": "18:00-02:00", "name": "SIDE BAR", "address": "茂名南路56号(淮海中路地铁站3号口步行420米)", "id": "B00156FSKX"}, "8PINTS八品脱·小花园餐酒吧(漕宝路店)|漕宝路36号2号楼C单元103室": {"hours": "10:00-01:00", "name": "8PINTS八品脱·小花园餐酒吧(漕宝路店)", "address": "漕宝路36号2号楼C单元103室", "id": "B0J2PH7RNV"}, "云山之藤(久光店)|南京西路1618号久光百货5楼": {"hours": "11:00-21:00", "name": "云山之藤(久光店)", "address": "南京西路1618号久光百货5楼(静安寺地铁站出入口旁)", "id": "B0KUMHM7U6"}, "幸福里homebar•年轻社交空间|定西路1016号银统大厦北楼1012号": {"hours": "20:30-02:00", "name": "幸福里homebar.年轻社交空间", "address": "定西路1016号银统大厦北楼1201室", "id": "B0LARLB9BV"}, "隐·九 BAR&COFFEE&TEA|淡水路250号(一大会址·新天地地铁站5号口步行220米)": {"hours": "12:00-03:00", "name": "隐·九BAR&COFFEE&TEA", "address": "淡水路250号(一大会址·新天地地铁站5号口步行220米)", "id": "B0K1JMEKWL"}, "W BAR·Shisha民谣鸡尾酒吧(长寿路店)|莫干山路50号3-107WArt&Bistro艺术酒馆": {"hours": "10:30-02:00", "name": "W BAR艺术民谣鸡尾酒吧(M50店)", "address": "莫干山路50号创意园内3-107 We Bar", "id": "B0LGLHNGW0"}, "聚野Taproom|威海路870号": {"hours": "19:00-01:00", "name": "聚野Taproom", "address": "威海路870号(威海路888弄小区正门旁)", "id": "B0KRTSSE08"}, "魔女喝喝精酿酒屋(静安店)|武定路535号": {"hours": "24小时营业", "name": "魔女喝喝精酿酒屋(静安店)", "address": "武定路535号(武定坊东南门旁)", "id": "B0FFISKD7S"}, "DASH LAND 大师兰德鸡尾酒吧(襄阳北路店)|襄阳北路1号": {"hours": "14:00-03:00", "name": "DASH LAND(襄阳北路店)", "address": "襄阳北路1号", "id": "B0K1L5JBCP"}, "724 Music Bar(灵石路店)|灵石路699号2号楼104室": {"hours": "19:30-03:00", "name": "724 music bar(灵石路店)", "address": "灵石路699号2号楼104室", "id": "B0K2FMFWE1"}, "魔女喝喝酒集(徐汇店)|石龙路659号": {"hours": "11:00-06:00", "name": "魔女喝喝酒集(徐汇)", "address": "石龙路659号(上海南站地铁站2号口步行440米)", "id": "B0KRYZ0W12"}, "夜航Homebar·拼豆手作·微醺酒馆|延安西路777号裕丰国际大厦701室": {"hours": "20:00-02:00", "name": "夜航homebar·拼豆手作·家庭酒馆", "address": "延安西路777号裕丰国际大厦701室", "id": "B0LGC4JGXK"}, "半醒bar家庭式酒馆home bar|长寿路1118号悦达国际大厦A座15B": {"hours": "20:00-04:00", "name": "半醒bar家庭式酒馆", "address": "长寿路1118号悦达国际大厦A座L1层", "id": "B0LGBO5XFF"}, "Cantona&bar(万航渡路店)|万航渡路457号": {"hours": "16:00-02:00", "name": "Cantona Bar(万航渡路店)", "address": "万航渡路457号(武定路地铁站2号口步行310米)", "id": "B0FFHKGM2X"}, "筝歌啤酒屋(巨鹿路店)|巨鹿路360-8号": {"hours": "18:00-03:00", "name": "筝歌啤酒屋(巨鹿路)", "address": "巨鹿路360号", "id": "B0J0FCSQFG"}, "筝歌啤酒屋(静安店)|康定路856号": {"hours": "17:00-01:00", "name": "筝歌啤酒屋(静安店)", "address": "曹家渡街道康定路856号(昌平路地铁站3号口步行420米)", "id": "B0K21AXA27"}, "8PINTS八品脱·精酿碳烤餐吧·后门Home bar·17点出餐(胶州路店)|胶州路633号一层（地铁7号线5号口出来直走过马路就是）": {"hours": "15:00-24:00", "name": "8PINTS八品脱·精酿碳烤餐吧(胶州路店)", "address": "胶州路633号一层(昌平路地铁站5号口步行140米)", "id": "B0LAZLY07U"}, "Cloud·SU LOUNGE the bund|中山东二路600号复星艺术中心4楼": {"hours": "19:00-02:00", "name": "Cloud·SU LOUNGE the bund", "address": "中山东二路600号复星艺术中心4层", "id": "B0LBZ1OUJN"}, "小公馆 Lafayette1315Bar|复兴中路1315号": {"hours": "11:00-23:00", "name": "小公馆Lafayette1315Bar", "address": "复兴中路1315号-1", "id": "B0HK05CWZ5"}, "Pigs Home家庭式酒吧(定西路店)|定西路1016号2101A": {"hours": "20:00-02:00", "name": "Pigs home家庭式社交酒吧", "address": "定西路1016弄银统大厦21楼2101A", "id": "B0LBNMAYUV"}, "Alive活着|同心路723号德必7街区A座一楼M9（巷子走到底）": {"hours": "20:00-02:00", "name": "Alive Bar", "address": "同心路723号德必7街区A座一楼M9(巷子走到底)", "id": "B0LDA76L1Z"}, "离线Homebar·家庭酒馆|大学路307号502室": {"hours": "20:00-03:00", "name": "离线homebar家庭小酒馆", "address": "大学路307弄502室", "id": "B0K1CZ6UWJ"}, "ANOTHER9(永昌大厦店)|余姚路27号": {"hours": "14:00-03:00", "name": "Another9(永昌大厦店)", "address": "余姚路27号", "id": "B0FFIS1K3L"}, "小亲新清酒社|永康路120号2楼空间": {"hours": "16:00-00:30", "name": "小亲新清酒社", "address": "永康路120号2层", "id": "B0LGNOUBL1"}, "卓X·研酒工坊|中山北路2790号杰地大厦五楼503-504室": {"hours": "20:00-02:00", "name": "卓X·研酒工坊", "address": "长寿路街道中山北路2790号杰地大厦503-504室", "id": "B0MGRRLB9L"}, "MENTAN 漫啖|南昌路264号": {"hours": "19:30-02:00", "name": "MENTAN 漫啖", "address": "南昌路264号", "id": "B0LA1LED07"}, "赛乐酒窖Cellar Door Wines(嘉善路店)|嘉善路508号尚街园区103A": {"hours": "12:00-23:00", "name": "赛乐酒窖Cellar Door Wines(嘉善路店)", "address": "嘉善路508号1-103A(嘉善路地铁站5号口步行340米)", "id": "B0FFFA1UKW"}, "SU LOUNGE 24Bespoke(中港汇铂尔曼店)|打浦桥街道打浦路15号上海中港汇铂尔曼大酒店24楼": {"hours": "19:00-03:00", "name": "SU LOUNGE 24 bespoke(中港汇铂尔曼店)", "address": "打浦桥街道打浦路15号上海中港汇铂尔曼大酒店24楼", "id": "B0L2YUVFMB"}, "坠入Bistro·贵州创意菜(南京西路店)|凤阳路659号-1室": {"hours": "11:00-22:00", "name": "坠入Bistro·贵州创意菜(南京西路店)", "address": "凤阳路659号-1室(南京西路地铁站5号口步行300米)", "id": "B0H0FSMKXX"}, "MOOD·homebar|人民路885号淮海中华大厦2010室": {"hours": "20:00-03:00", "name": "Mood·Homebar", "address": "人民路885-905号淮海中华大厦2010室", "id": "B0L13U6J4V"}, "VANFO·晚疯|打浦桥街道瑞金二路272号1号楼202室": {"hours": "19:00-03:00", "name": "VANFO·晚疯(装修中)", "address": "打浦桥街道瑞金二路272号1号楼202室", "id": "B0JRTMZIPE"}, "芸颂酒窖Winsome Cellar(静安寺店)|南京西路街道北京西路1381号": {"hours": "11:00-24:00", "name": "芸颂酒窖WinsomeCellar(静安寺店)", "address": "北京西路1381号", "id": "B0LKHCQFP0"}, "Lounge微醺Cocktail·Whisky·Bar|蒙自路207号12号楼(马当路地铁站3号口步行400米)": {"hours": "18:00-03:00", "name": "Lounge微醺", "address": "打浦桥街道蒙自路207号宏慧盟智园12号楼1层001B室", "id": "B0HULA2ZV8"}, "Yoo78 Coffee&Bar|斜土路1111弄1-20号福华花苑": {"hours": "08:00-23:30", "name": "Yoo78 Coffee", "address": "斜土路1111弄1-20号福华花苑", "id": "B0L3AST6MH"}, "Royal Flush Game Bar(长寿路店)|长寿路97号(江宁路地铁站4号口步行230米)": {"hours": "19:00-02:00", "name": "Royal Flush Club(长寿路店)", "address": "长寿路97号世纪商务大厦(江宁路地铁站4号口步行220米)", "id": "B0M1LZL8Y6"}, "COPLUSDE 咖啡豆仓(襄阳南路店）|襄阳南路288号-2号": {"hours": "09:00-22:00", "name": "COPLUSDE咖啡豆仓(襄阳南路店)", "address": "襄阳南路288号-2号", "id": "B0HKVH6SHC"}, "Kisslab|威海路856(南京西路地铁站12号口步行410米)": {"hours": "18:00-02:00", "name": "KISS LAB", "address": "威海路856(南京西路地铁站12号口步行410米)", "id": "B0K239QNCY"}};
+function hoursIntervals(text){
+  text=String(text||'').replaceAll('星期','周').replaceAll('礼拜','周').replace(/[：]/g,':').replace(/[～~—–一]/g, c=>c==='一'?c:'-');
+  if(/24小时|全天营业|00:00-24:00/.test(text))return [{days:[0,1,2,3,4,5,6],start:0,end:1440}];
+  const dayNumbers={'日':0,'天':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6};
+  const clauses=[...text.matchAll(/((?:周[一二三四五六日天](?:至|到|-)?(?:[、,，]\s*)?)+)\s*([^周]*)/g)];
+  const sections=clauses.length?clauses.map(m=>[m[1],m[2]]):[['',text]];
+  const intervals=[];
+  for(const [scope,times] of sections){
+    if(/节假日|工作日/.test(scope+times))return [];
+    const days=new Set();
+    for(const m of scope.matchAll(/周([一二三四五六日天])(?:(?:至|到|-)周?([一二三四五六日天]))?/g)){
+      let day=dayNumbers[m[1]];const end=dayNumbers[m[2]||m[1]];
+      for(let i=0;i<7;i++){days.add(day);if(day===end)break;day=(day+1)%7;}
+    }
+    if(!scope)for(let i=0;i<7;i++)days.add(i);
+    for(const m of times.matchAll(/(\d{1,2}):(\d{2})\s*[-至到]\s*(?:次日|翌日)?\s*(\d{1,2}):(\d{2})/g)){
+      const [h1,m1,h2,m2]=m.slice(1).map(Number);
+      if(h1>23||m1>59||h2>24||m2>59||(h2===24&&m2))continue;
+      intervals.push({days:[...days],start:h1*60+m1,end:h2*60+m2});
+    }
+  }
+  return intervals;
+}
+function isOpenNow(bar,now=new Date()){
+  const hours=checkedHours[barId(bar)];
+  if(!hours)return false;
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Shanghai',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now).map(p=>[p.type,p.value]));
+  const day=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(parts.weekday);
+  const minute=Number(parts.hour)*60+Number(parts.minute);
+  return hoursIntervals(hours.hours).some(x=>x.end>x.start
+    ?x.days.includes(day)&&minute>=x.start&&minute<x.end
+    :(x.days.includes(day)&&minute>=x.start)||(x.days.includes((day+6)%7)&&minute<x.end));
+}
+
+function nearest(rows,p){return rows.filter(b=>isOpenNow(b)).filter(b=>Array.isArray(b.point)&&b.point.length===2&&b.point.every(Number.isFinite)).filter(b=>kindMatch(b,$('kind').value)).filter(b=>!$('hideToday').checked||!events.some(e=>e.bar_id===barId(b)&&e.visit_day===today())).filter(b=>!$('hideHistory').checked||!visits[barId(b)]?.count).map(b=>({...b,km:distance(p,b.point)})).sort((a,b)=>a.km-b.km).slice(0,5)}
 function barById(id){return window.BARS.find(b=>barId(b)===id)}
 function profileItem(e,withUndo){const bar=barById(e.bar_id),row=document.createElement('div');row.className='profile-item';const info=document.createElement('div'),name=document.createElement('strong');name.textContent=bar?.name||e.bar_id.split('|')[0];const meta=document.createElement('small');meta.textContent=(e.visit_day||'日期未知')+(e.visit_count>1?' · '+e.visit_count+' 次':'');info.append(name,meta);row.append(info);if(withUndo){const undo=document.createElement('button');undo.className='secondary';undo.textContent='撤销';undo.onclick=()=>bar&&markVisit(bar);row.append(undo)}return row}
 function renderProfile(){if(!$('profileName'))return;$('profileName').textContent=profile.nickname||'酒鬼朋友';$('profileAvatar').textContent=profile.avatar||'🍸';const visited=Object.values(visits).filter(v=>v.count>0);$('profileCount').textContent='去过 '+visited.length+' 家 · 打卡 '+visited.reduce((n,v)=>n+v.count,0)+' 次';const t=events.filter(e=>e.visit_day===today());$('todayList').replaceChildren(...t.map(e=>profileItem(e,true)));if(!t.length)$('todayList').textContent='今天还没有打卡。';$('clearToday').disabled=!t.length;const q=$('historySearch').value.trim().toLowerCase();const list=events.filter(e=>(barById(e.bar_id)?.name||e.bar_id).toLowerCase().includes(q));$('historyList').replaceChildren(...list.map(e=>profileItem(e,false)));if(!list.length)$('historyList').textContent='没有匹配的历史记录。'}
@@ -802,15 +837,16 @@ function show(){
   if(!origin)return;
   const selected=nearest(window.BARS,origin),mapped=window.BARS.filter(b=>b.point).length;
   $('list').replaceChildren();
-  $('resultTitle').textContent='离你最近的 '+selected.length+' 家';
+  $('resultTitle').textContent='正在营业的附近酒馆 · '+selected.length+' 家';
   $('coverage').textContent='已匹配坐标 '+mapped+' / '+window.BARS.length+' 家'+(mapped<window.BARS.length?' · 未匹配门店不参与排名，当前结果可能不完整':'');
+  $('coverage').textContent+=' · 仅显示当前营业门店，45家营业时间未核实已隐藏';
   const run=++walkRun; selected.forEach((b,i)=>{
     const card=document.createElement('article');
     card.className='card';
     const h=document.createElement('h3');h.textContent=b.name;
     const d=document.createElement('strong');d.className='distance';d.id='walk-'+i;d.textContent='步行时间查询中 · 直线距离 ';const dist=document.createElement('span');dist.textContent=b.km<1?Math.round(b.km*1000)+' 米':b.km.toFixed(2)+' 公里';d.append(dist);
     const addr=document.createElement('p');addr.textContent=b.address;
-    const time=document.createElement('p');time.textContent=b.hours;
+    const time=document.createElement('p');time.textContent='营业时间 '+checkedHours[barId(b)].hours+' · 高德核对 2026-11-19';
     const link=document.createElement('a');
     link.className='maplink';link.textContent='带我去 →';
     link.href='https://uri.amap.com/marker?position='+b.point.join(',')+'&name='+encodeURIComponent(b.name)+'&coordinate=gaode&callnative=1';
@@ -820,10 +856,13 @@ function show(){
     const visit=document.createElement('div');visit.className='visit-actions';const v=document.createElement('button');v.type='button';v.className='secondary'+(events.some(e=>e.bar_id===barId(b)&&e.visit_day===today())?' active':'');v.textContent=events.some(e=>e.bar_id===barId(b)&&e.visit_day===today())?'撤销今日已去':'标记今日已去';v.onclick=()=>markVisit(b);visit.append(v);if(visits[barId(b)]?.count){const note=document.createElement('small');note.textContent='历史去过 '+visits[barId(b)].count+' 次';visit.append(note)}card.append(h);appendBarDetails(card,b);card.append(d,addr,time,info,actions,visit);
     $('list').append(card)
   });
-  $('placeholder').hidden=true;
+  $('placeholder').hidden=selected.length>0;
+  if(!selected.length)$('placeholder').textContent='当前没有符合条件且已确认营业时间的酒馆。';
   walkTimes(selected,origin,run);message('找到你了，按直线距离从近到远排好了。'+(lastAccuracy?' 定位精度约 '+Math.round(lastAccuracy)+' 米。':''));
 }
 
+setInterval(()=>{if(origin)show()},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&origin)show()});
 function gcj(lng,lat){
   if(lng<72.004||lng>137.8347||lat<.8293||lat>55.8271)return[lng,lat];
   const pi=Math.PI,x=lng-105,y=lat-35;
